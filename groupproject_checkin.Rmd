@@ -29,7 +29,7 @@ Structural predictors include:
 
 We are considering standardizing/normalizing/logging the populations variables due to concerns of high correlations between these variables and the outcome variable.
 
-Real-Time Predictors include
+Real-Time Predictors include:
 
 - Number of COVID Cases
 - Number of Days Since the issurance of Stay-at-Home Order
