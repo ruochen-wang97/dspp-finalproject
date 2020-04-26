@@ -7,7 +7,7 @@ urlcolor: blue
 
 ## Question of Interest
 
-  We will develop different models to predict the number of unemployment claims filed in each US state in the second week of May (when the project is due). Our primary data source for the outcome variable is the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
+We will develop different models to predict the number of unemployment claims filed in each US state in the second week of May (when the project is due). Our primary data source for the outcome variable is the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
 
 ## Project Progress
 
@@ -37,7 +37,9 @@ Real-Time Predictors include
 - Peak of Claims Predicted (we haven't found a specific data source but will keep looking)
 - Whether there has been a protest/protests in the state
 
-**Algorithms**: CART/RANDOM FOREST. We will have three predictive models based off of data from when the first case was reported in the US and when the first death was reported in the US.
+**Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
+
+**Algorithms**: KNN/CART/RANDOM FOREST. We will test each algorithm and get the error rates and pick the best one.
 
 **Error Metric**: RMSE (we'll have to explain why?)
 
