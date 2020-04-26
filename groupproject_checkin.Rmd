@@ -9,19 +9,37 @@ urlcolor: blue
 
 **Project Progress:** In the wake of the COVID-19 pandemic and responses set up by different states to this crisis, we have finally decided on pursuing the following predicted model for our analysis: 
 
-- **What we are trying to predict**: Either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. Initial claims is one of the most-sensitive, high-frequency official statistics used to detect changes in the labor market (Source: [Aaron Soujourner and Paul Goldsmith Pinkham UI trends data](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html).
+**What we are trying to predict**: Either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. Initial claims is one of the most-sensitive, high-frequency official statistics used to detect changes in the labor market (Source: [Aaron Soujourner and Paul Goldsmith Pinkham UI trends data](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html).
 
-- **Predictors**: Structural predictors include population, per capita income,top industry contributing to GDP, working population, region, and percentage population with a highschool degree. Some concerns of using these variables is high correlation in population variables and the need to pre-process (standardize/normalize/log) them. 
+**Predictors**: Structural predictors include population, per capita income,top industry contributing to GDP, working population, region, and percentage population with a highschool degree. Some concerns of using these variables is high correlation in population variables and the need to pre-process (standardize/normalize/log) them. 
 Real-time predictors include Number of COVID cases per state, number of days since the stay-at-home orders started, peaks predicted for each state (although we haven't found a particular data source), Democratic or Republic governor, number of days till stay-at-home orders will end, and days since the protests started per state. 
 
 - **Error Metric**: RMSE (we'll have to explain why?)
 
 - **Pre-processing data**: 
 
-- **Predictive model**: CART/RANDOM FOREST.. explain and tell them we'll have three predictive models on the basis of the following initial information:
+- **Predictive model**: CART/RANDOM FOREST.. explain and tell them we'll have three predictive models on the basis of the following initial information: First case reported, First death reported, New info on first case reported
+ 
+## Data Cleaning
 
--- First case reported
--- First death reported
--- New info on first case reported
- 
- 
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, echo=T, message=F, warning=F}
+
+library(tidyverse)
+```
+
+```{r topindustry_bystate, echo=T, message=F, warning=F}
+
+topindustry_bystate <-
+  read.csv("data_raw/gdp_byindustry_bystate_2019.csv")
+
+topindustry_bystate <- topindustry_bystate %>%
+  filter(str_detect(string = Description,
+                    pattern = "    ")) %>%
+  filter(!str_detect(string = Description, 
+                     pattern = "     "))
+```
