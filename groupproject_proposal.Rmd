@@ -1,0 +1,16 @@
+---
+title: "Group Project Proposal"
+author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
+output: pdf_document
+urlcolor: blue
+---
+
+**Group Members:** Radhika Kaul, Odiche Nwabuikwu, Ruochen Wang
+
+**Project Option:** Option 1 (Group)
+
+**Question of Interest:** What are some of the factors that affect the number of unemployment claims in a U.S. state in the time of COVID-19?
+
+**Data Source(s):** *(subject to change)* [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration; [Occupational Employment Statistics](https://www.bls.gov/oes/tables.htm) from the DOL's Bureau of Labor Statistics; demographic statistics from the [American Community Survey](https://www.census.gov/programs-surveys/acs) of the U.S. Census Bureau, etc.
+
+**Project Description:** Since President Trump declared a national emergency over the coronavirus pandemic on March 13, more than 22 million Americans have filed for unemployment benefits (see https://www.washingtonpost.com/business/2020/04/16/unemployment-claims-coronavirus/). The main purpose of our project is to explore factors that can likely explain the surge in unemployment filings in each of America's states, and to predict the trend of unemployment in each state in the weeks to come. We will be using a supervised machine learning framework - likely a decision tree model - in our analyses and prediction, with unemployment and demographic data drawn from major U.S. government agencies. The end product will be a set of models that can be used to predict the trend in unemployment claims for each state within the span of one week, two weeks, and four weeks (subject to change, depending on feasibility). We are hoping our project can shed some light on the employment prospects of the U.S. labor market in a time of uncertainty, and at the same time provide us with all the data science fun while we are all quarantined at home!
