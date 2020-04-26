@@ -39,9 +39,9 @@ Real-Time Predictors include:
 
 **Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
 
-**Algorithms**: KNN/CART/RANDOM FOREST. We will test each algorithm and get the error rates and pick the best one.
+**Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
 
-**Error Metric**: RMSE (we'll have to explain why?)
+**Error Metric**: RMSE (OOB Error for Random Forest)
 
 ## Data Cleaning
 
