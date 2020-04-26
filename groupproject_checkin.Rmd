@@ -5,7 +5,7 @@ output: pdf_document
 urlcolor: blue
 ---
 
-**Question of Interest:** Predicting the number of unemployment claims filed per U.S. state in in the second week of May (When project is due) using data from various sources but the major source of what we want to predict comes from the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
+**Question of Interest:** Predicting the number of unemployment claims filed per U.S. state in in the second week of May (when project is due) using data from various sources but the major source of what we want to predict comes from the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
 
 **Project Progress:** In the wake of the COVID-19 pandemic and responses set up by different states to this crisis, we have finally decided on pursuing the following predicted model for our analysis: 
 
@@ -14,11 +14,11 @@ urlcolor: blue
 **Predictors**: Structural predictors include population, per capita income,top industry contributing to GDP, working population, region, and percentage population with a highschool degree. Some concerns of using these variables is high correlation in population variables and the need to pre-process (standardize/normalize/log) them. 
 Real-time predictors include Number of COVID cases per state, number of days since the stay-at-home orders started, peaks predicted for each state (although we haven't found a particular data source), Democratic or Republic governor, number of days till stay-at-home orders will end, and days since the protests started per state. 
 
-- **Error Metric**: RMSE (we'll have to explain why?)
-
 - **Pre-processing data**: 
 
-- **Predictive model**: CART/RANDOM FOREST.. explain and tell them we'll have three predictive models on the basis of the following initial information: First case reported, First death reported, New info on first case reported
+- **Predictive model**: Since we are using weekly time series data by state (and we have 15 weeks worth of data on both initial and continiuing uneployment claims) in addition to having features that are structural as well as real time, we propose to use a **Random Forest** model. This [example](https://towardsdatascience.com/analyzing-recent-unemployment-data-f4d1ff7da2b1) gives an idea of why not only initial claims (UI claims people applied for the first time) but also continuing claims (UI claims people who remain on unemployment benefits) give us a real-time impact on unemployment as the US started observing its first cases of COVID-19 cases. Random Forest is known to be robust to correlated predictors because in the aformentioned section, some structural variables are highly correlated (ex. population and working population by state). Also given the volatility in the weekly claims data which we plan to explore, this method has relatively better chance of making 'out-of-sample' predictions, and better interpretability.
+
+- **Error Metric**: 
  
 ## Data Cleaning
 
@@ -35,7 +35,7 @@ library(tidyverse)
 ```{r topindustry_bystate, echo=T, message=F, warning=F}
 
 topindustry_bystate <-
-  read.csv("data_raw/gdp_byindustry_bystate_2019.csv")
+  read.csv("data/raw/gdp_bystate_byindustry_2019.csv")
 
 topindustry_bystate <- topindustry_bystate %>%
   filter(str_detect(string = Description,
