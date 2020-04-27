@@ -1,70 +1,66 @@
-"SAINC5N Personal Income by Major Component and Earnings by NAICS Industry 1/"
-"Per capita personal income (Dollars) 3/" 
-"Bureau of Economic Analysis" 
-"State or DC"
-"GeoFips","GeoName","2019"
-"00000","United States",56663
-"01000","Alabama",43880
-"02000","Alaska",62102
-"04000","Arizona",46233
-"05000","Arkansas",44845
-"06000","California",66661
-"08000","Colorado",61348
-"09000","Connecticut",79087
-"10000","Delaware",54264
-"11000","District of Columbia",84538
-"12000","Florida",51989
-"13000","Georgia",48199
-"15000","Hawaii",57450
-"16000","Idaho",45642
-"17000","Illinois",58935
-"18000","Indiana",48657
-"19000","Iowa",52636
-"20000","Kansas",53453
-"21000","Kentucky",44017
-"22000","Louisiana",48008
-"23000","Maine",50950
-"24000","Maryland",65683
-"25000","Massachusetts",74967
-"26000","Michigan",50320
-"27000","Minnesota",59683
-"28000","Mississippi",39368
-"29000","Missouri",49589
-"30000","Montana",49074
-"31000","Nebraska",54871
-"32000","Nevada",50883
-"33000","New Hampshire",63880
-"34000","New Jersey",70979
-"35000","New Mexico",43984
-"36000","New York",71440
-"37000","North Carolina",47803
-"38000","North Dakota",57501
-"39000","Ohio",50546
-"40000","Oklahoma",47951
-"41000","Oregon",52937
-"42000","Pennsylvania",58775
-"44000","Rhode Island",56542
-"45000","South Carolina",45314
-"46000","South Dakota",53925
-"47000","Tennessee",48761
-"48000","Texas",52504
-"49000","Utah",48395
-"50000","Vermont",56691
-"51000","Virginia",60116
-"53000","Washington",64898
-"54000","West Virginia",42336
-"55000","Wisconsin",53583
-"56000","Wyoming",63316
-"91000","New England",70683
-"92000","Mideast",67172
-"93000","Great Lakes",52870
-"94000","Plains",54157
-"95000","Southeast",49145
-"96000","Southwest",50578
-"97000","Rocky Mountain",54769
-"98000","Far West",64252
-"Legend / Footnotes:"
-"1/ The estimates of earnings for 1998-2006 are based on the 2002 North American Industry Classification System (NAICS). The estimates for 2007-2010 are based on the 2007 NAICS. The estimates for 2011-2016 are based on the 2012 NAICS. The estimates for 2017 forward are based on the 2017 NAICS."
-"3/ Per capita personal income is total personal income divided by total midyear population."
-"Note-- All dollar estimates are in thousands of current dollars (not adjusted for inflation). Statistics presented in thousands of dollars do not indicate more precision than statistics presented  in millions of dollars."
-"Last updated: March 24, 2020-- new statistics for 2019; revised statistics for 2010-2018."
+GeoFips,GeoName,2019
+0,United States,56663
+1000,Alabama,43880
+2000,Alaska,62102
+4000,Arizona,46233
+5000,Arkansas,44845
+6000,California,66661
+8000,Colorado,61348
+9000,Connecticut,79087
+10000,Delaware,54264
+11000,District of Columbia,84538
+12000,Florida,51989
+13000,Georgia,48199
+15000,Hawaii,57450
+16000,Idaho,45642
+17000,Illinois,58935
+18000,Indiana,48657
+19000,Iowa,52636
+20000,Kansas,53453
+21000,Kentucky,44017
+22000,Louisiana,48008
+23000,Maine,50950
+24000,Maryland,65683
+25000,Massachusetts,74967
+26000,Michigan,50320
+27000,Minnesota,59683
+28000,Mississippi,39368
+29000,Missouri,49589
+30000,Montana,49074
+31000,Nebraska,54871
+32000,Nevada,50883
+33000,New Hampshire,63880
+34000,New Jersey,70979
+35000,New Mexico,43984
+36000,New York,71440
+37000,North Carolina,47803
+38000,North Dakota,57501
+39000,Ohio,50546
+40000,Oklahoma,47951
+41000,Oregon,52937
+42000,Pennsylvania,58775
+44000,Rhode Island,56542
+45000,South Carolina,45314
+46000,South Dakota,53925
+47000,Tennessee,48761
+48000,Texas,52504
+49000,Utah,48395
+50000,Vermont,56691
+51000,Virginia,60116
+53000,Washington,64898
+54000,West Virginia,42336
+55000,Wisconsin,53583
+56000,Wyoming,63316
+91000,New England,70683
+92000,Mideast,67172
+93000,Great Lakes,52870
+94000,Plains,54157
+95000,Southeast,49145
+96000,Southwest,50578
+97000,Rocky Mountain,54769
+98000,Far West,64252
+Legend / Footnotes:,,
+1/ The estimates of earnings for 1998-2006 are based on the 2002 North American Industry Classification System (NAICS). The estimates for 2007-2010 are based on the 2007 NAICS. The estimates for 2011-2016 are based on the 2012 NAICS. The estimates for 2017 forward are based on the 2017 NAICS.,,
+3/ Per capita personal income is total personal income divided by total midyear population.,,
+Note-- All dollar estimates are in thousands of current dollars (not adjusted for inflation). Statistics presented in thousands of dollars do not indicate more precision than statistics presented  in millions of dollars.,,
+"Last updated: March 24, 2020-- new statistics for 2019; revised statistics for 2010-2018.",,
