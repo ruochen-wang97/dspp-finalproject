@@ -5,21 +5,46 @@ output: pdf_document
 urlcolor: blue
 ---
 
-**Question of Interest:** Predicting the number of unemployment claims filed per U.S. state in in the second week of May (When project is due) using data from various sources but the major source of what we want to predict comes from the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
+## Question of Interest
 
-**Project Progress:** In the wake of the COVID-19 pandemic and responses set up by different states to this crisis, we have finally decided on pursuing the following predicted model for our analysis: 
+We will develop different models to predict the number of unemployment claims filed in each US state in the second week of May (when the project is due). Our primary data source for the outcome variable is the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
 
-**What we are trying to predict**: Either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. Initial claims is one of the most-sensitive, high-frequency official statistics used to detect changes in the labor market (Source: [Aaron Soujourner and Paul Goldsmith Pinkham UI trends data](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html).
+## Project Progress
 
-**Predictors**: Structural predictors include population, per capita income,top industry contributing to GDP, working population, region, and percentage population with a highschool degree. Some concerns of using these variables is high correlation in population variables and the need to pre-process (standardize/normalize/log) them. 
-Real-time predictors include Number of COVID cases per state, number of days since the stay-at-home orders started, peaks predicted for each state (although we haven't found a particular data source), Democratic or Republic governor, number of days till stay-at-home orders will end, and days since the protests started per state. 
+We have decided on the following variables for our models:
 
-- **Error Metric**: RMSE (we'll have to explain why?)
+**Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment in the labor market (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
 
-- **Pre-processing data**: 
+**Predictors** *(all variables are at the state level)*
 
-- **Predictive model**: CART/RANDOM FOREST.. explain and tell them we'll have three predictive models on the basis of the following initial information: First case reported, First death reported, New info on first case reported
- 
+Structural predictors include:
+
+- Region
+- Population
+- Working Population
+- Per Capita Personal Income
+- Percent Population w/ a High School Degree
+- Top Industry in terms of GDP Contribution
+- Democratic or Republican Governor
+
+We are considering standardizing/normalizing/logging the populations variables due to concerns of high correlations between these variables and the outcome variable.
+
+Real-Time Predictors include:
+
+- Number of COVID Cases
+- Number of Days Since the issurance of Stay-at-Home Order
+- Number of Days Before the Stay-at-Home Order ends
+- Peak of Claims Predicted (we haven't found a specific data source but will keep looking)
+- Whether there has been a protest/protests in the state
+
+**Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
+
+**Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
+
+We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data we are going to explore, this algorithm will make more accurate out-of-sample predictions as compared to KNN and CART.
+
+**Error Metric**: RMSE (OOB Error for Random Forest)
+
 ## Data Cleaning
 
 ```{r setup, include=FALSE}
@@ -43,3 +68,7 @@ topindustry_bystate <- topindustry_bystate %>%
   filter(!str_detect(string = Description, 
                      pattern = "     "))
 ```
+
+## (Immediate) Next Steps
+
+We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset.
