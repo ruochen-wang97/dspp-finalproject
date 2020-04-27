@@ -41,6 +41,8 @@ Real-Time Predictors include:
 
 **Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
 
+We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data we are going to explore, this algorithm will make more accurate out-of-sample predictions as compared to KNN and CART.
+
 **Error Metric**: RMSE (OOB Error for Random Forest)
 
 ## Data Cleaning
@@ -66,3 +68,7 @@ topindustry_bystate <- topindustry_bystate %>%
   filter(!str_detect(string = Description, 
                      pattern = "     "))
 ```
+
+## (Immediate) Next Steps
+
+We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset.
