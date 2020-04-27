@@ -1,7 +1,9 @@
 ---
 title: "Group Project Check-in"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 urlcolor: blue
 ---
 
@@ -13,7 +15,7 @@ We will develop different models to predict the number of unemployment claims fi
 
 We have decided on the following variables for our models:
 
-**Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment in the labor market (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
+**Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment trends (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
 
 **Predictors** *(all variables are at the state level)*
 
@@ -27,24 +29,23 @@ Structural predictors include:
 - Top Industry in terms of GDP Contribution
 - Democratic or Republican Governor
 
-We are considering standardizing/normalizing/logging the populations variables due to concerns of high correlations between these variables and the outcome variable.
+We are considering standardizing/normalizing/logging the population variables due to concerns of high correlations between these variables and the outcome variable.
 
 Real-Time Predictors include:
 
 - Number of COVID Cases
-- Number of Days Since the issurance of Stay-at-Home Order
-- Number of Days Before the Stay-at-Home Order ends
-- Peak of Claims Predicted (we haven't found a specific data source but will keep looking)
+- Number of Days Since the Issurance of Stay-at-Home Order
+- Number of Days Before Stay-at-Home Order Ends
+- Peak of Claims Predicted *(we haven't found a data source yet but will keep looking)*
 - Whether there has been a protest/protests in the state
 
 **Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
 
 **Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
 
-We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data we are going to explore, this algorithm will make more accurate out-of-sample predictions as compared to KNN and CART.
+We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data, Random Forest will make more accurate out-of-sample predictions as compared to KNN and CART.
 
-**Error Metric**: RMSE (OOB Error for Random Forest)
-
+**Error Metrics**: RMSE (OOB Error for Random Forest)
 
 ## Data Cleaning
 
@@ -60,6 +61,7 @@ library(readxl)
 
 
 ### State GDP by Industry
+
 ```{r ind_clean, echo=T, message=F, warning=F}
 
 industry <-
@@ -144,6 +146,7 @@ occ <- occ %>%
 NOTE: This dataset will be further formatted and merged with the others after further discussion.
 
 ### Census Regions
+
 ```{r regions_clean, echo=T, message=F, warning=F}
 
 # load data
@@ -153,7 +156,6 @@ regions <- regions %>%
   select(State, Region) %>%
   rename(state_name = State, region_name = Region)
 ```
-
 
 
 ## Merge Datasets
