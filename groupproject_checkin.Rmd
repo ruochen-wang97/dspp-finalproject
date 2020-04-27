@@ -139,9 +139,9 @@ occ <- occ %>%
   select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %>%
   rename(fips = area, state_name = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )
 
-# NOTE: This dataset will be further formatted and merged with the others after further discussion.
-
 ```
+
+NOTE: This dataset will be further formatted and merged with the others after further discussion.
 
 ### Census Regions
 ```{r regions_clean, echo=T, message=F, warning=F}
