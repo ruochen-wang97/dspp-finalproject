@@ -1,7 +1,9 @@
 ---
 title: "Group Project Check-in"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 urlcolor: blue
 ---
 
