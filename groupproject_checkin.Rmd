@@ -180,13 +180,30 @@ regions <- regions %>%
 sah <- read_excel("data/raw/stayathome.xlsx")
 
 clean_data <-
-  left_join(claims, income, by = "state") %>%
-  left_join(., gdp, by = "state") %>%
-  left_join(., pop, by = "state") %>%
-  left_join(., occ, by = "state") %>%
-  left_join(., regions, by = "state") %>%
-  left_join(., sah, by = "state") %>%
-  write_csv("data/clean/merged.csv")
+  left_join(claims, income, by = "state")
+anti_join(clean_data, income)
+
+clean_data <-
+  left_join(clean_data, gdp, by = "state")
+anti_join(clean_data, gdp)
+
+clean_data <-
+  left_join(clean_data, pop, by = "state")
+anti_join(clean_data, pop)
+
+clean_data <-
+  left_join(clean_data, occ, by = "state")
+anti_join(clean_data, occ)
+
+clean_data <-
+  left_join(clean_data, regions, by = "state")
+anti_join(clean_data, regions)
+
+clean_data <-
+  left_join(clean_data, sah, by = "state")
+anti_join(clean_data, sah)
+
+clean_data %>% write_csv("data/clean/merged.csv")
 ```
 
 We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we'll begin descriptive analysis and finalizing the features we will use in the model.
