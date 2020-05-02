@@ -94,8 +94,7 @@ gdp <-
 
 gdp <- gdp %>%
   filter(str_detect(string = Description,
-                    pattern = "    ") |
-           Description == "All industry total") %>% 
+                    pattern = "    ")) %>% 
   filter(!str_detect(string = Description, 
                      pattern = "     ")) %>% # remove aggregate & sub-industries
   filter(GeoName != "United States") %>% # remove federal data
@@ -107,6 +106,11 @@ gdp <- gdp %>%
   pivot_wider(names_from = Description, state,
               values_from = gdp2019) %>%
   filter(!state %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
+
+# find top industry wrt gdp
+gdp <- gdp %>%
+  mutate(topind_gdp = colnames(gdp)[apply(gdp, 1, which.max)]) %>%
+  select(state, topind_gdp)
 ```
 
 ### Per Capita Personal Income
@@ -150,10 +154,10 @@ occ <- occ %>%
   pivot_wider(names_from = occ_title, state,
               values_from = jobs_1000)
 
-# find top industry
+# find top industry wrt employment
 occ <- occ %>%
-  mutate(topind = colnames(occ)[apply(occ, 1, which.max)]) %>%
-  select(state, topind)
+  mutate(topind_emp = colnames(occ)[apply(occ, 1, which.max)]) %>%
+  select(state, topind_emp)
 ```
 
 ATT: need further discussion since not much variance

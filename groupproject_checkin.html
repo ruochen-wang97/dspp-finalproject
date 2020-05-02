@@ -1703,8 +1703,7 @@ claims &lt;-
 
 gdp &lt;- gdp %&gt;%
   filter(str_detect(string = Description,
-                    pattern = &quot;    &quot;) |
-           Description == &quot;All industry total&quot;) %&gt;% 
+                    pattern = &quot;    &quot;)) %&gt;% 
   filter(!str_detect(string = Description, 
                      pattern = &quot;     &quot;)) %&gt;% # remove aggregate &amp; sub-industries
   filter(GeoName != &quot;United States&quot;) %&gt;% # remove federal data
@@ -1715,7 +1714,12 @@ gdp &lt;- gdp %&gt;%
 gdp &lt;- gdp %&gt;% 
   pivot_wider(names_from = Description, state,
               values_from = gdp2019) %&gt;%
-  filter(!state %in% c(&quot;New England&quot;, &quot;Mideast&quot;, &quot;Great Lakes&quot;, &quot;Plains&quot;, &quot;Southeast&quot;, &quot;Southwest&quot;, &quot;Rocky Mountain&quot;, &quot;Far West&quot;))</code></pre>
+  filter(!state %in% c(&quot;New England&quot;, &quot;Mideast&quot;, &quot;Great Lakes&quot;, &quot;Plains&quot;, &quot;Southeast&quot;, &quot;Southwest&quot;, &quot;Rocky Mountain&quot;, &quot;Far West&quot;))
+
+# find top industry wrt gdp
+gdp &lt;- gdp %&gt;%
+  mutate(topind_gdp = colnames(gdp)[apply(gdp, 1, which.max)]) %&gt;%
+  select(state, topind_gdp)</code></pre>
 </div>
 <div id="per-capita-personal-income" class="section level3">
 <h3>Per Capita Personal Income</h3>
@@ -1750,10 +1754,10 @@ occ &lt;- occ %&gt;%
   pivot_wider(names_from = occ_title, state,
               values_from = jobs_1000)
 
-# find top industry
+# find top industry wrt employment
 occ &lt;- occ %&gt;%
-  mutate(topind = colnames(occ)[apply(occ, 1, which.max)]) %&gt;%
-  select(state, topind)</code></pre>
+  mutate(topind_emp = colnames(occ)[apply(occ, 1, which.max)]) %&gt;%
+  select(state, topind_emp)</code></pre>
 <p>ATT: need further discussion since not much variance</p>
 </div>
 <div id="census" class="section level3">
