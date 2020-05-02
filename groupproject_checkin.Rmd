@@ -101,24 +101,23 @@ gdp <- gdp %>%
   filter(GeoName != "United States") %>% # remove federal data
   filter(X2019 != "(NA)" & X2019 != "(D)") %>% # remove non-numeric values
   rename(gdp2019 = X2019, state = GeoName) # rename GDP and state variables
-  
-  # change data to wide
-  gdp <- gdp %>% 
+
+# change data to wide
+gdp <- gdp %>% 
   pivot_wider(names_from = Description, state,
               values_from = gdp2019) %>%
   filter(!state %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
 ```
 
-### Personal Income by State 
+### Per Capita Personal Income
 
 ```{r inc-clean, echo=T, message=F, warning=F}
 
-# load data
 income <- read_csv("data/raw/percapitapersonalincome_bystate_2019.csv")
 
 income <- income %>%
   filter(as.numeric(GeoFips) >= 1000 & as.numeric(GeoFips) <= 56000) %>% # remove fed/regional data
-  rename(income = "2019", state = GeoName) %>%
+  rename(personal_inc2019 = "2019", state = GeoName) %>%
   select(-GeoFips)
 ```
 

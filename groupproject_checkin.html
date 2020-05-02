@@ -1710,21 +1710,20 @@ gdp &lt;- gdp %&gt;%
   filter(GeoName != &quot;United States&quot;) %&gt;% # remove federal data
   filter(X2019 != &quot;(NA)&quot; &amp; X2019 != &quot;(D)&quot;) %&gt;% # remove non-numeric values
   rename(gdp2019 = X2019, state = GeoName) # rename GDP and state variables
-  
-  # change data to wide
-  gdp &lt;- gdp %&gt;% 
+
+# change data to wide
+gdp &lt;- gdp %&gt;% 
   pivot_wider(names_from = Description, state,
               values_from = gdp2019) %&gt;%
   filter(!state %in% c(&quot;New England&quot;, &quot;Mideast&quot;, &quot;Great Lakes&quot;, &quot;Plains&quot;, &quot;Southeast&quot;, &quot;Southwest&quot;, &quot;Rocky Mountain&quot;, &quot;Far West&quot;))</code></pre>
 </div>
-<div id="personal-income-by-state" class="section level3">
-<h3>Personal Income by State</h3>
-<pre class="r"><code># load data
-income &lt;- read_csv(&quot;data/raw/percapitapersonalincome_bystate_2019.csv&quot;)
+<div id="per-capita-personal-income" class="section level3">
+<h3>Per Capita Personal Income</h3>
+<pre class="r"><code>income &lt;- read_csv(&quot;data/raw/percapitapersonalincome_bystate_2019.csv&quot;)
 
 income &lt;- income %&gt;%
   filter(as.numeric(GeoFips) &gt;= 1000 &amp; as.numeric(GeoFips) &lt;= 56000) %&gt;% # remove fed/regional data
-  rename(income = &quot;2019&quot;, state = GeoName) %&gt;%
+  rename(personal_inc2019 = &quot;2019&quot;, state = GeoName) %&gt;%
   select(-GeoFips)</code></pre>
 </div>
 <div id="population-by-state" class="section level3">
