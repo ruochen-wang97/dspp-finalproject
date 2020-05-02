@@ -1735,16 +1735,26 @@ pop &lt;- pop %&gt;%
   select(-SUMLEV, -REGION, -DIVISION) %&gt;%
   rename(fips = STATE, state = NAME, pop2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pct_pop_over18 = PCNT_POPEST18PLUS)</code></pre>
 </div>
-<div id="employment-by-occupation-by-state" class="section level3">
-<h3>Employment by Occupation by State</h3>
-<pre class="r"><code># load data
-occ &lt;- read_excel(&quot;data/raw/employment_byoccupation_bystate_may2019.xlsx&quot;)
+<div id="employment-by-occupation" class="section level3">
+<h3>Employment by Occupation</h3>
+<pre class="r"><code>occ &lt;- read_excel(&quot;data/raw/employment_byoccupation_bystate_may2019.xlsx&quot;)
 
 occ &lt;- occ %&gt;%
   filter(o_group == &quot;major&quot;) %&gt;%
-  select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %&gt;%
-  rename(fips = area, state = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )</code></pre>
-<p>NOTE: This dataset will be further formatted and merged with the others after further discussion.</p>
+  select(area_title, occ_code, occ_title, jobs_1000) %&gt;%
+  mutate(jobs_1000 = as.numeric(jobs_1000)) %&gt;%
+  rename(state = area_title)
+
+# change data to wide
+occ &lt;- occ %&gt;% 
+  pivot_wider(names_from = occ_title, state,
+              values_from = jobs_1000)
+
+# find top industry
+occ &lt;- occ %&gt;%
+  mutate(topind = colnames(occ)[apply(occ, 1, which.max)]) %&gt;%
+  select(state, topind)</code></pre>
+<p>ATT: need further discussion since not much variance</p>
 </div>
 <div id="census-regions" class="section level3">
 <h3>Census Regions</h3>
@@ -1761,6 +1771,7 @@ regions &lt;- regions %&gt;%
   left_join(claims, income, by = &quot;state&quot;) %&gt;%
   left_join(., gdp, by = &quot;state&quot;) %&gt;%
   left_join(., pop, by = &quot;state&quot;) %&gt;%
+  left_join(., occ, by = &quot;state&quot;) %&gt;%
   left_join(., regions, by = &quot;state&quot;) %&gt;%
   write_csv(&quot;data/clean/merged.csv&quot;)</code></pre>
 <p>We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we’ll begin descriptive analysis and finalizing the features we will use in the model.</p>

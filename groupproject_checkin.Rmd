@@ -133,20 +133,30 @@ pop <- pop %>%
   rename(fips = STATE, state = NAME, pop2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pct_pop_over18 = PCNT_POPEST18PLUS)
 ```
 
-### Employment by Occupation by State
+### Employment by Occupation
 
 ```{r occ-clean, echo=T, message=F, warning=F}
 
-# load data
 occ <- read_excel("data/raw/employment_byoccupation_bystate_may2019.xlsx")
 
 occ <- occ %>%
   filter(o_group == "major") %>%
-  select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %>%
-  rename(fips = area, state = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )
+  select(area_title, occ_code, occ_title, jobs_1000) %>%
+  mutate(jobs_1000 = as.numeric(jobs_1000)) %>%
+  rename(state = area_title)
+
+# change data to wide
+occ <- occ %>% 
+  pivot_wider(names_from = occ_title, state,
+              values_from = jobs_1000)
+
+# find top industry
+occ <- occ %>%
+  mutate(topind = colnames(occ)[apply(occ, 1, which.max)]) %>%
+  select(state, topind)
 ```
 
-NOTE: This dataset will be further formatted and merged with the others after further discussion.
+ATT: need further discussion since not much variance
 
 ### Census Regions
 
@@ -168,6 +178,7 @@ clean_data <-
   left_join(claims, income, by = "state") %>%
   left_join(., gdp, by = "state") %>%
   left_join(., pop, by = "state") %>%
+  left_join(., occ, by = "state") %>%
   left_join(., regions, by = "state") %>%
   write_csv("data/clean/merged.csv")
 ```
