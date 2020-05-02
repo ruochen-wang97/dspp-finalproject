@@ -177,12 +177,15 @@ regions <- regions %>%
 
 ```{r merge, echo=T, message=F, warning=F}
 
+sah <- read_excel("data/raw/stayathome.xlsx")
+
 clean_data <-
   left_join(claims, income, by = "state") %>%
   left_join(., gdp, by = "state") %>%
   left_join(., pop, by = "state") %>%
   left_join(., occ, by = "state") %>%
   left_join(., regions, by = "state") %>%
+  left_join(., sah, by = "state") %>%
   write_csv("data/clean/merged.csv")
 ```
 

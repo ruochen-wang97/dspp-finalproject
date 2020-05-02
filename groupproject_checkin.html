@@ -1770,12 +1770,15 @@ regions &lt;- regions %&gt;%
 </div>
 <div id="merge-datasets" class="section level3">
 <h3>Merge Datasets</h3>
-<pre class="r"><code>clean_data &lt;-
+<pre class="r"><code>sah &lt;- read_excel(&quot;data/raw/stayathome.xlsx&quot;)
+
+clean_data &lt;-
   left_join(claims, income, by = &quot;state&quot;) %&gt;%
   left_join(., gdp, by = &quot;state&quot;) %&gt;%
   left_join(., pop, by = &quot;state&quot;) %&gt;%
   left_join(., occ, by = &quot;state&quot;) %&gt;%
   left_join(., regions, by = &quot;state&quot;) %&gt;%
+  left_join(., sah, by = &quot;state&quot;) %&gt;%
   write_csv(&quot;data/clean/merged.csv&quot;)</code></pre>
 <p>We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we’ll begin descriptive analysis and finalizing the features we will use in the model.</p>
 </div>
