@@ -1729,7 +1729,6 @@ pop &lt;- pop %&gt;%
 <pre class="r"><code># load data
 occ &lt;- read_excel(&quot;data/raw/employment_byoccupation_bystate_may2019.xlsx&quot;)
 
-
 occ &lt;- occ %&gt;%
   filter(o_group == &quot;major&quot;) %&gt;%
   select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %&gt;%
@@ -1745,15 +1744,18 @@ regions &lt;- regions %&gt;%
   select(State, Region) %&gt;%
   rename(state_name = State, region_name = Region)</code></pre>
 </div>
-</div>
-<div id="merge-datasets" class="section level2">
-<h2>Merge Datasets</h2>
+<div id="merge-datasets" class="section level3">
+<h3>Merge Datasets</h3>
 <pre class="r"><code>clean_data &lt;- claims %&gt;%
   left_join(income) %&gt;%
   left_join(industry) %&gt;%
   left_join(pop) %&gt;%
   left_join(regions) %&gt;%
   write_csv(&quot;data/clean/merged.csv&quot;)</code></pre>
+</div>
+<div id="change-data-to-wide" class="section level3">
+<h3>Change Data to Wide</h3>
+</div>
 </div>
 <div id="immediate-next-steps" class="section level2">
 <h2>(Immediate) Next Steps</h2>

@@ -5,6 +5,8 @@ output:
   html_document:
     df_print: paged
 urlcolor: blue
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Question of Interest
@@ -55,14 +57,37 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load-packages, echo=T, message=F, warning=F}
-library(tidyverse)
+
 library(readxl)
+library(haven)
+library(tidyverse)
+library(tidyr)
 ```
 
+### Unemployment Claims
+
+```{r unemp-clean, echo=T, message=F, warning=F}
+
+claims <- read_excel("data/raw/unemployment_bystate_weekly.xls")
+
+claims <- claims %>%
+  rename(state_name = State) %>%
+  rename_all(~str_to_lower(colnames(claims))) %>%
+  rename_all(~str_replace_all(., "\\s+", "_")) %>%
+  filter(state != "Puerto Rico" &
+           state != "Virgin Islands" ) %>%
+  select(state, reflecting_week_ended, initial_claims, continued_claims)
+
+#change data to wide
+claims <-
+  pivot_wider(data = claims,
+              names_from = reflecting_week_ended,
+              values_from = c(initial_claims, continued_claims))
+```
 
 ### State GDP by Industry
 
-```{r ind_clean, echo=T, message=F, warning=F}
+```{r ind-clean, echo=T, message=F, warning=F}
 
 industry <-
   read.csv("data/raw/gdp_bystate_byindustry_2019.csv")
@@ -81,26 +106,11 @@ industry <- industry %>%
 industry <- industry %>% 
   pivot_wider(names_from = Description, state_name, values_from = gdp) %>%
   filter(!state_name %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
-
 ```
-
-
-### Unemployment Claims
-
-```{r unemp_clean, echo=T, message=F, warning=F}
-
-# load data
-claims <- read_excel("data/raw/unemployment_bystate_weekly.xls")
-
-claims <- claims %>%
-  rename(state_name = State)
-
-```
-
 
 ### Personal Income by State 
 
-```{r inc_clean, echo=T, message=F, warning=F}
+```{r inc-clean, echo=T, message=F, warning=F}
 
 # load data
 income <- read_csv("data/raw/percapitapersonalincome_bystate_2019.csv")
@@ -109,13 +119,11 @@ income <- income %>%
   filter(as.numeric(GeoFips) >= 1000 & as.numeric(GeoFips) <= 56000) %>% # remove fed/regional data
   rename(income = "2019", state_name = GeoName) %>%
   select(-GeoFips)
-
 ```
-
 
 ### Population by State
 
-```{r pop_clean, echo=T, message=F, warning=F}
+```{r pop-clean, echo=T, message=F, warning=F}
 
 # load data
 pop <- read_csv("data/raw/popest_bystate_2019.csv")
@@ -124,30 +132,26 @@ pop <- pop %>%
   filter(!NAME %in% c("United States", "Puerto Rico Commonwealth")) %>%
   select(-SUMLEV, -REGION, -DIVISION) %>%
   rename(fips = STATE, state_name = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)
-
 ```
-
 
 ### Employment by Occupation by State
 
-```{r occ_clean, echo=T, message=F, warning=F}
+```{r occ-clean, echo=T, message=F, warning=F}
 
 # load data
 occ <- read_excel("data/raw/employment_byoccupation_bystate_may2019.xlsx")
-
 
 occ <- occ %>%
   filter(o_group == "major") %>%
   select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %>%
   rename(fips = area, state_name = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )
-
 ```
 
 NOTE: This dataset will be further formatted and merged with the others after further discussion.
 
 ### Census Regions
 
-```{r regions_clean, echo=T, message=F, warning=F}
+```{r regions-clean, echo=T, message=F, warning=F}
 
 # load data
 regions <- read_excel("data/raw/censusregion_bystate.xlsx")
@@ -157,8 +161,8 @@ regions <- regions %>%
   rename(state_name = State, region_name = Region)
 ```
 
+### Merge Datasets
 
-## Merge Datasets
 ```{r merge, echo=T, message=F, warning=F}
 
 clean_data <- claims %>%
@@ -169,7 +173,7 @@ clean_data <- claims %>%
   write_csv("data/clean/merged.csv")
 ```
 
-
 ## (Immediate) Next Steps
 
 We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset.
+
