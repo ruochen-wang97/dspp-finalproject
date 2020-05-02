@@ -121,17 +121,16 @@ income <- income %>%
   select(-GeoFips)
 ```
 
-### Population by State
+### Population
 
 ```{r pop-clean, echo=T, message=F, warning=F}
 
-# load data
 pop <- read_csv("data/raw/popest_bystate_2019.csv")
 
 pop <- pop %>%
   filter(!NAME %in% c("United States", "Puerto Rico Commonwealth")) %>%
   select(-SUMLEV, -REGION, -DIVISION) %>%
-  rename(fips = STATE, state = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)
+  rename(fips = STATE, state = NAME, pop2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pct_pop_over18 = PCNT_POPEST18PLUS)
 ```
 
 ### Employment by Occupation by State
