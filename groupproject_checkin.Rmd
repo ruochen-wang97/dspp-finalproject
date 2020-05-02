@@ -173,7 +173,4 @@ clean_data <- claims %>%
   write_csv("data/clean/merged.csv")
 ```
 
-## (Immediate) Next Steps
-
-We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset.
-
+We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we'll begin descriptive analysis and finalizing the features we will use in the model.
