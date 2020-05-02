@@ -78,34 +78,35 @@ claims <- claims %>%
            state != "Virgin Islands" ) %>%
   select(state, reflecting_week_ended, initial_claims, continued_claims)
 
-#change data to wide
+# change data to wide
 claims <-
   pivot_wider(data = claims,
               names_from = reflecting_week_ended,
               values_from = c(initial_claims, continued_claims))
 ```
 
-### State GDP by Industry
+### GDP by Industry
 
-```{r ind-clean, echo=T, message=F, warning=F}
+```{r gdp-clean, echo=T, message=F, warning=F}
 
-industry <-
+gdp <-
   read.csv("data/raw/gdp_bystate_byindustry_2019.csv")
 
-# data cleaning
-industry <- industry %>%
+gdp <- gdp %>%
   filter(str_detect(string = Description,
-                    pattern = "    ")) %>% 
+                    pattern = "    ") |
+           Description == "All industry total") %>% 
   filter(!str_detect(string = Description, 
-                     pattern = "     ")) %>% # removing sub-industries
-  filter(GeoName != "United States") %>% # removing federal data
-  filter(X2019 != "(NA)" & X2019 != "(D)") %>% # removing non-numeric values from GDP
-  rename(gdp = X2019, state_name = GeoName) # renaming GDP and state variables
-
-# reshape data
-industry <- industry %>% 
-  pivot_wider(names_from = Description, state_name, values_from = gdp) %>%
-  filter(!state_name %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
+                     pattern = "     ")) %>% # remove aggregate & sub-industries
+  filter(GeoName != "United States") %>% # remove federal data
+  filter(X2019 != "(NA)" & X2019 != "(D)") %>% # remove non-numeric values
+  rename(gdp2019 = X2019, state = GeoName) # rename GDP and state variables
+  
+  # change data to wide
+  gdp <- gdp %>% 
+  pivot_wider(names_from = Description, state,
+              values_from = gdp2019) %>%
+  filter(!state %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
 ```
 
 ### Personal Income by State 
@@ -117,7 +118,7 @@ income <- read_csv("data/raw/percapitapersonalincome_bystate_2019.csv")
 
 income <- income %>%
   filter(as.numeric(GeoFips) >= 1000 & as.numeric(GeoFips) <= 56000) %>% # remove fed/regional data
-  rename(income = "2019", state_name = GeoName) %>%
+  rename(income = "2019", state = GeoName) %>%
   select(-GeoFips)
 ```
 
@@ -131,7 +132,7 @@ pop <- read_csv("data/raw/popest_bystate_2019.csv")
 pop <- pop %>%
   filter(!NAME %in% c("United States", "Puerto Rico Commonwealth")) %>%
   select(-SUMLEV, -REGION, -DIVISION) %>%
-  rename(fips = STATE, state_name = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)
+  rename(fips = STATE, state = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)
 ```
 
 ### Employment by Occupation by State
@@ -144,7 +145,7 @@ occ <- read_excel("data/raw/employment_byoccupation_bystate_may2019.xlsx")
 occ <- occ %>%
   filter(o_group == "major") %>%
   select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %>%
-  rename(fips = area, state_name = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )
+  rename(fips = area, state = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )
 ```
 
 NOTE: This dataset will be further formatted and merged with the others after further discussion.
@@ -158,18 +159,18 @@ regions <- read_excel("data/raw/censusregion_bystate.xlsx")
 
 regions <- regions %>%
   select(State, Region) %>%
-  rename(state_name = State, region_name = Region)
+  rename(state = State, region_name = Region)
 ```
 
 ### Merge Datasets
 
 ```{r merge, echo=T, message=F, warning=F}
 
-clean_data <- claims %>%
-  left_join(income) %>%
-  left_join(industry) %>%
-  left_join(pop) %>%
-  left_join(regions) %>%
+clean_data <-
+  left_join(claims, income, by = "state") %>%
+  left_join(., gdp, by = "state") %>%
+  left_join(., pop, by = "state") %>%
+  left_join(., regions, by = "state") %>%
   write_csv("data/clean/merged.csv")
 ```
 

@@ -1674,35 +1674,48 @@ summary {
 </div>
 <div id="data-cleaning" class="section level2">
 <h2>Data Cleaning</h2>
-<pre class="r"><code>library(tidyverse)
-library(readxl)</code></pre>
-<div id="state-gdp-by-industry" class="section level3">
-<h3>State GDP by Industry</h3>
-<pre class="r"><code>industry &lt;-
-  read.csv(&quot;data/raw/gdp_bystate_byindustry_2019.csv&quot;)
-
-# data cleaning
-industry &lt;- industry %&gt;%
-  filter(str_detect(string = Description,
-                    pattern = &quot;    &quot;)) %&gt;% 
-  filter(!str_detect(string = Description, 
-                     pattern = &quot;     &quot;)) %&gt;% # removing sub-industries
-  filter(GeoName != &quot;United States&quot;) %&gt;% # removing federal data
-  filter(X2019 != &quot;(NA)&quot; &amp; X2019 != &quot;(D)&quot;) %&gt;% # removing non-numeric values from GDP
-  rename(gdp = X2019, state_name = GeoName) # renaming GDP and state variables
-
-# reshape data
-industry &lt;- industry %&gt;% 
-  pivot_wider(names_from = Description, state_name, values_from = gdp) %&gt;%
-  filter(!state_name %in% c(&quot;New England&quot;, &quot;Mideast&quot;, &quot;Great Lakes&quot;, &quot;Plains&quot;, &quot;Southeast&quot;, &quot;Southwest&quot;, &quot;Rocky Mountain&quot;, &quot;Far West&quot;))</code></pre>
-</div>
+<pre class="r"><code>library(readxl)
+library(haven)
+library(tidyverse)
+library(tidyr)</code></pre>
 <div id="unemployment-claims" class="section level3">
 <h3>Unemployment Claims</h3>
-<pre class="r"><code># load data
-claims &lt;- read_excel(&quot;data/raw/unemployment_bystate_weekly.xls&quot;)
+<pre class="r"><code>claims &lt;- read_excel(&quot;data/raw/unemployment_bystate_weekly.xls&quot;)
 
 claims &lt;- claims %&gt;%
-  rename(state_name = State)</code></pre>
+  rename(state_name = State) %&gt;%
+  rename_all(~str_to_lower(colnames(claims))) %&gt;%
+  rename_all(~str_replace_all(., &quot;\\s+&quot;, &quot;_&quot;)) %&gt;%
+  filter(state != &quot;Puerto Rico&quot; &amp;
+           state != &quot;Virgin Islands&quot; ) %&gt;%
+  select(state, reflecting_week_ended, initial_claims, continued_claims)
+
+# change data to wide
+claims &lt;-
+  pivot_wider(data = claims,
+              names_from = reflecting_week_ended,
+              values_from = c(initial_claims, continued_claims))</code></pre>
+</div>
+<div id="gdp-by-industry" class="section level3">
+<h3>GDP by Industry</h3>
+<pre class="r"><code>gdp &lt;-
+  read.csv(&quot;data/raw/gdp_bystate_byindustry_2019.csv&quot;)
+
+gdp &lt;- gdp %&gt;%
+  filter(str_detect(string = Description,
+                    pattern = &quot;    &quot;) |
+           Description == &quot;All industry total&quot;) %&gt;% 
+  filter(!str_detect(string = Description, 
+                     pattern = &quot;     &quot;)) %&gt;% # remove aggregate &amp; sub-industries
+  filter(GeoName != &quot;United States&quot;) %&gt;% # remove federal data
+  filter(X2019 != &quot;(NA)&quot; &amp; X2019 != &quot;(D)&quot;) %&gt;% # remove non-numeric values
+  rename(gdp2019 = X2019, state = GeoName) # rename GDP and state variables
+  
+  # change data to wide
+  gdp &lt;- gdp %&gt;% 
+  pivot_wider(names_from = Description, state,
+              values_from = gdp2019) %&gt;%
+  filter(!state %in% c(&quot;New England&quot;, &quot;Mideast&quot;, &quot;Great Lakes&quot;, &quot;Plains&quot;, &quot;Southeast&quot;, &quot;Southwest&quot;, &quot;Rocky Mountain&quot;, &quot;Far West&quot;))</code></pre>
 </div>
 <div id="personal-income-by-state" class="section level3">
 <h3>Personal Income by State</h3>
@@ -1711,7 +1724,7 @@ income &lt;- read_csv(&quot;data/raw/percapitapersonalincome_bystate_2019.csv&qu
 
 income &lt;- income %&gt;%
   filter(as.numeric(GeoFips) &gt;= 1000 &amp; as.numeric(GeoFips) &lt;= 56000) %&gt;% # remove fed/regional data
-  rename(income = &quot;2019&quot;, state_name = GeoName) %&gt;%
+  rename(income = &quot;2019&quot;, state = GeoName) %&gt;%
   select(-GeoFips)</code></pre>
 </div>
 <div id="population-by-state" class="section level3">
@@ -1722,7 +1735,7 @@ pop &lt;- read_csv(&quot;data/raw/popest_bystate_2019.csv&quot;)
 pop &lt;- pop %&gt;%
   filter(!NAME %in% c(&quot;United States&quot;, &quot;Puerto Rico Commonwealth&quot;)) %&gt;%
   select(-SUMLEV, -REGION, -DIVISION) %&gt;%
-  rename(fips = STATE, state_name = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)</code></pre>
+  rename(fips = STATE, state = NAME, pop_2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pcnt_pop_over18 = PCNT_POPEST18PLUS)</code></pre>
 </div>
 <div id="employment-by-occupation-by-state" class="section level3">
 <h3>Employment by Occupation by State</h3>
@@ -1732,7 +1745,7 @@ occ &lt;- read_excel(&quot;data/raw/employment_byoccupation_bystate_may2019.xlsx
 occ &lt;- occ %&gt;%
   filter(o_group == &quot;major&quot;) %&gt;%
   select(area, area_title, occ_code, occ_title, tot_emp, jobs_1000, h_mean, h_median) %&gt;%
-  rename(fips = area, state_name = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )</code></pre>
+  rename(fips = area, state = area_title, mean_hourly_wage = h_mean, med_hourly_wage = h_median )</code></pre>
 <p>NOTE: This dataset will be further formatted and merged with the others after further discussion.</p>
 </div>
 <div id="census-regions" class="section level3">
@@ -1742,24 +1755,18 @@ regions &lt;- read_excel(&quot;data/raw/censusregion_bystate.xlsx&quot;)
 
 regions &lt;- regions %&gt;%
   select(State, Region) %&gt;%
-  rename(state_name = State, region_name = Region)</code></pre>
+  rename(state = State, region_name = Region)</code></pre>
 </div>
 <div id="merge-datasets" class="section level3">
 <h3>Merge Datasets</h3>
-<pre class="r"><code>clean_data &lt;- claims %&gt;%
-  left_join(income) %&gt;%
-  left_join(industry) %&gt;%
-  left_join(pop) %&gt;%
-  left_join(regions) %&gt;%
+<pre class="r"><code>clean_data &lt;-
+  left_join(claims, income, by = &quot;state&quot;) %&gt;%
+  left_join(., gdp, by = &quot;state&quot;) %&gt;%
+  left_join(., pop, by = &quot;state&quot;) %&gt;%
+  left_join(., regions, by = &quot;state&quot;) %&gt;%
   write_csv(&quot;data/clean/merged.csv&quot;)</code></pre>
-</div>
-<div id="change-data-to-wide" class="section level3">
-<h3>Change Data to Wide</h3>
-</div>
-</div>
-<div id="immediate-next-steps" class="section level2">
-<h2>(Immediate) Next Steps</h2>
 <p>We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we’ll begin descriptive analysis and finalizing the features we will use in the model.</p>
+</div>
 </div>
 
 
