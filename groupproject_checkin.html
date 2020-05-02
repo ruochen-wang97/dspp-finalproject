@@ -1756,14 +1756,13 @@ occ &lt;- occ %&gt;%
   select(state, topind)</code></pre>
 <p>ATT: need further discussion since not much variance</p>
 </div>
-<div id="census-regions" class="section level3">
-<h3>Census Regions</h3>
-<pre class="r"><code># load data
-regions &lt;- read_excel(&quot;data/raw/censusregion_bystate.xlsx&quot;)
+<div id="census" class="section level3">
+<h3>Census</h3>
+<pre class="r"><code>regions &lt;- read_excel(&quot;data/raw/censusregion_bystate.xlsx&quot;)
 
 regions &lt;- regions %&gt;%
   select(State, Region) %&gt;%
-  rename(state = State, region_name = Region)</code></pre>
+  rename(state = State, region = Region)</code></pre>
 </div>
 <div id="merge-datasets" class="section level3">
 <h3>Merge Datasets</h3>

@@ -158,16 +158,15 @@ occ <- occ %>%
 
 ATT: need further discussion since not much variance
 
-### Census Regions
+### Census
 
 ```{r regions-clean, echo=T, message=F, warning=F}
 
-# load data
 regions <- read_excel("data/raw/censusregion_bystate.xlsx")
 
 regions <- regions %>%
   select(State, Region) %>%
-  rename(state = State, region_name = Region)
+  rename(state = State, region = Region)
 ```
 
 ### Merge Datasets
