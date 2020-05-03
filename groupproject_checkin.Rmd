@@ -125,18 +125,6 @@ income <- income %>%
   select(-GeoFips)
 ```
 
-### Population
-
-```{r pop-clean, echo=T, message=F, warning=F}
-
-pop <- read_csv("data/raw/popest_bystate_2019.csv")
-
-pop <- pop %>%
-  filter(!NAME %in% c("United States", "Puerto Rico Commonwealth")) %>%
-  select(-SUMLEV, -REGION, -DIVISION) %>%
-  rename(fips = STATE, state = NAME, pop2019 = POPESTIMATE2019, pop_over18 = POPEST18PLUS2019, pct_pop_over18 = PCNT_POPEST18PLUS)
-```
-
 ### Employment by Occupation
 
 ```{r occ-clean, echo=T, message=F, warning=F}
@@ -185,10 +173,6 @@ clean_data <-
 anti_join(clean_data, gdp)
 
 clean_data <-
-  left_join(clean_data, pop, by = "state")
-anti_join(clean_data, pop)
-
-clean_data <-
   left_join(clean_data, occ, by = "state")
 anti_join(clean_data, occ)
 
@@ -222,8 +206,8 @@ clean_data <-
 anti_join(clean_data, edattain)
 
 # load & add working pop data
-pctworkpop <- read_csv("data/raw/pctworkpopest_bystate_2018.csv") %>%
-  select(state, pctpop_work)
+pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
+  select(state, totpop_2018, totpop_work, pctpop_work)
 
 clean_data <-
   left_join(clean_data, pctworkpop, by = "state")
