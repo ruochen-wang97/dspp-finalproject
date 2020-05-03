@@ -1,0 +1,116 @@
+---
+title: "Random Forest Model Building"
+author: "Radhika Kaul"
+date: "5/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+### Loading required R packages
+```{r load packages}
+library(tidyverse)
+library(caret)
+library(randomForest)
+library(readr)
+library(ggplot2) 
+library(ggthemes)
+library(dplyr) 
+library(lubridate) # for manipulation of dates
+library(rpart) # rpart for imputation
+
+```
+
+### Loading abd Preparing data
+
+```{r Load data}
+
+# Load the data
+merged <- read_csv("data/clean/merged.csv")
+
+# Inspect the data
+
+
+# Split the data into training and test set
+set.seed(123)
+training.samples <- merged$`initial_claims_2020-04-04` %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- merged[training.samples, ]
+test.data <- merged[-training.samples, ]
+
+# Check for NA and Applying na.roughfix to replace NAs with column medians
+
+train.data <- na.roughfix(df_train)
+test.data <- na.roughfix(df_test)
+
+sum(is.na(train.data)) # should be zero
+
+```
+
+
+### Pre-processing the data
+
+```{r data pre-process}
+
+```
+
+### Training the model and making predictions
+
+```{r RF computation}
+
+# Fit the model on the training set
+set.seed(123)
+
+model <- train(medv ~., 
+               data = train.data, 
+               method = "rf",
+  trControl = trainControl("repeatedcv", number = 10)
+  )
+
+model
+
+# OR 
+
+rf_fit <- train(as.factor(`initial_claims_2020-04-04`) ~ ., 
+                data = train.data, 
+                method = "ranger")
+
+rf_fit
+```
+
+### ### Tuning the parameters - Best tuning parameter mtry - i don't quite understand this
+
+```{r tuning strategy}
+
+```
+
+
+```{r Predictions}
+
+# Make predictions on the test data
+pred_results <- predict(train.data,
+                       test.data,
+                       type = "raw")
+
+pred_df <- data.frame(pred_results)
+
+valid_verify_df <- cbind(test.data$`initial_claims_2020-04-04`,pred_df)
+head(valid_verify_df)
+
+# OR 
+
+predictions <- model %>% predict(test.data)
+head(predictions)
+
+# Compute the average prediction error RMSE
+RMSE(predictions, test.data$`initial_claims_2020-04-04`)
+
+```
+
+### Defining and visualizing variable importance
