@@ -181,8 +181,8 @@ clean_data <-
 anti_join(clean_data, regions)
 ```
 
+```{r merge-sah-date, echo=T, message=F, warning=F}
 
-```{r multiple_sources_compilation, echo=T, message=F, warning=F}
 # load & add stay at home date data
 sah <- read_excel("data/raw/stayathome.xlsx")
 
@@ -191,8 +191,8 @@ clean_data <-
 anti_join(clean_data, sah)
 ```
 
+```{r merge-peak-date,  echo=T, message=F, warning=F}
 
-```{r predicted_peak_deaths,  echo=T, message=F, warning=F}
 #load & add peak death data
 
 sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
@@ -204,8 +204,8 @@ clean_data <-
 anti_join(clean_data, sah_peakdeaths)
 ```
 
+```{r merge-ed-attainment,  echo=T, message=F, warning=F}
 
-```{r Ed_attainment_data_merge,  echo=T, message=F, warning=F}
 # load & add ed attainment data
 edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
 
@@ -214,7 +214,8 @@ clean_data <-
 anti_join(clean_data, edattain)
 ```
 
-```{r working_pop_data,  echo=T, message=F, warning=F}
+```{r merge-working-pop,  echo=T, message=F, warning=F}
+
 # load & add working pop data
 pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
   select(state, totpop_2018, totpop_work, pctpop_work)
@@ -224,7 +225,8 @@ clean_data <-
 anti_join(clean_data, pctworkpop)
 ```
 
-```{r Dem/Rep_governor,  echo=T, message=F, warning=F}
+```{r merge-gov-party,  echo=T, message=F, warning=F}
+
 # load & add governor party data
 party <- read_excel("data/raw/party_bystate_2020.xlsx")
 
@@ -233,23 +235,22 @@ clean_data <-
 anti_join(clean_data, party)
 ```
 
+```{r merge-ihme-covid-data,  echo=T, message=F, warning=F}
 
-```{r predicted_deaths_IHME_data,  echo=T, message=F, warning=F}
-# load & add governor party data
 ihme_data <- read_excel("data/raw/Covid_data_April10.xlsx")
 ihme_data$date <- as.character(ihme_data$date)
 
 ihme_data <- ihme_data %>%
-              rename(state = "location_name") %>%
-              select(state, date, deaths_mean, totdea_mean) %>%
-              filter(date == "2020-04-10")
+  rename(state = "location_name") %>%
+  select(state, date, deaths_mean, totdea_mean) %>%
+  filter(date == "2020-04-10")
 
 clean_data <-
   left_join(clean_data, ihme_data, by = "state")
 anti_join(clean_data, ihme_data)
 ```
 
-```{r actual_deaths_till_Apr10, echo=T, message=F, warning=F}
+```{r merge-death-num-till-apr10, echo=T, message=F, warning=F}
 
 # Loading packages
 library(httr)
@@ -266,7 +267,7 @@ jhu_data <- mydata %>%
   filter(Country_Region == "US") 
 
 
-jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""), ] %>%
+jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""),] %>%
   select(state, Last_Update, Confirmed, Deaths, Recovered)
 
 jhu_data_final <- jhu_data %>% 
@@ -278,8 +279,8 @@ clean_data <-
 anti_join(clean_data, jhu_data_final)
 ```
 
+```{r merge-incidence-and-mortality-rate-apr12, echo=T, message=F, warning=F}
 
-```{r incidence_mortality_rates_Apr12, echo=T, message=F, warning=F}
 # April 12 data on rates of incidence and mortality
 jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
 
@@ -295,10 +296,10 @@ clean_data <-
 anti_join(clean_data, jhu_data_1)
 ```
 
+### Create Final Analytical Data
 
+```{r final-merge, echo=T, message=F, warning=F}
 
-### FINAL MERGED FILE (TIDY FORMAT)
-```{r final_merge}
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
 
