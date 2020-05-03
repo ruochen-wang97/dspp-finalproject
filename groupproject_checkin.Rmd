@@ -175,7 +175,7 @@ regions <- regions %>%
 
 ### Stay at Home Date and Days Since Predicted Peak
 
-```{r sah_clean, echo=T, message=F, warning=F}
+```{r sah-clean, echo=T, message=F, warning=F}
 
 sah <- read_excel("data/raw/stayathome.xlsx")
 sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
@@ -209,7 +209,9 @@ clean_data <-
 anti_join(clean_data, sah)
 
 clean_data <-
-  left_join(clean_data, sah_peakdeaths, by = "state")
+  left_join(clean_data, sah_peakdeaths, by = "state") %>%
+  rename(massgath_res_date = mg_restr,
+         noness_res_date = noness_restr)
 anti_join(clean_data, sah_peakdeaths)
 
 clean_data %>% write_csv("data/clean/merged.csv")
