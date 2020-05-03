@@ -196,7 +196,6 @@ clean_data <-
   rename(massgath_res_date = mg_restr,
          noness_res_date = noness_restr)
 anti_join(clean_data, sah_peakdeaths)
-  left_join(clean_data, sah_peakdeaths, by = "state")
 
 # load & add ed attainment data
 edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
@@ -212,6 +211,13 @@ pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
 clean_data <-
   left_join(clean_data, pctworkpop, by = "state")
 anti_join(clean_data, pctworkpop)
+
+# load & add governor party data
+party <- read_excel("data/raw/party_bystate_2020.xlsx")
+
+clean_data <-
+  left_join(clean_data, party, by = "state")
+anti_join(clean_data, party)
 
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
