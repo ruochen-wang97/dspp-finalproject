@@ -173,12 +173,19 @@ regions <- regions %>%
   rename(state = State, region = Region)
 ```
 
+### Stay at home dates and predicted peaks by IHME model.
+
+```{r sah_clean, echo=T, message=F, warning=F}
+
+# load data
+sah <- read_excel("data/raw/stayathome.xlsx")
+
+sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
+```
+
 ### Merge Datasets
 
 ```{r merge, echo=T, message=F, warning=F}
-
-sah <- read_excel("data/raw/stayathome.xlsx")
-
 clean_data <-
   left_join(claims, income, by = "state")
 anti_join(clean_data, income)
@@ -202,6 +209,10 @@ anti_join(clean_data, regions)
 clean_data <-
   left_join(clean_data, sah, by = "state")
 anti_join(clean_data, sah)
+
+clean_data <-
+  left_join(clean_data, sah_peakdeaths, by = "state")
+anti_join(clean_data, sah_peakdeaths)
 
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
