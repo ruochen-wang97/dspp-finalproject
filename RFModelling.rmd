@@ -39,7 +39,7 @@ merged <- read_csv("data/clean/merged.csv")
 
 # Split the data into training and test set
 set.seed(123)
-training.samples <- merged$`initial_claims_2020-04-04` %>%
+training.samples <- merged$`initial_claims_2020-04-11` %>%
   createDataPartition(p = 0.8, list = FALSE)
 train.data  <- merged[training.samples, ]
 test.data <- merged[-training.samples, ]
