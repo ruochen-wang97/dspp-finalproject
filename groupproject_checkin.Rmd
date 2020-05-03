@@ -274,8 +274,8 @@ jhu_data_final <- jhu_data %>%
   summarise(sum_deaths = sum(Deaths))
 
 clean_data <-
-  left_join(clean_data, jhu_data, by = "state")
-anti_join(clean_data, jhu_data)
+  left_join(clean_data, jhu_data_final, by = "state")
+anti_join(clean_data, jhu_data_final)
 ```
 
 
