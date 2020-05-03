@@ -1,5 +1,5 @@
 ---
-title: "Group Project Check-in"
+title: "Unemployment Claims Data Construction"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
 output:
   html_document:
@@ -179,14 +179,20 @@ anti_join(clean_data, occ)
 clean_data <-
   left_join(clean_data, regions, by = "state")
 anti_join(clean_data, regions)
+```
 
+
+```{r multiple_sources_compilation, echo=T, message=F, warning=F}
 # load & add stay at home date data
 sah <- read_excel("data/raw/stayathome.xlsx")
 
 clean_data <-
   left_join(clean_data, sah, by = "state")
 anti_join(clean_data, sah)
+```
 
+
+```{r predicted_peak_deaths,  echo=T, message=F, warning=F}
 #load & add peak death data
 
 sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
@@ -196,14 +202,19 @@ clean_data <-
   rename(massgath_res_date = mg_restr,
          noness_res_date = noness_restr)
 anti_join(clean_data, sah_peakdeaths)
+```
 
+
+```{r Ed_attainment_data_merge,  echo=T, message=F, warning=F}
 # load & add ed attainment data
 edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
 
 clean_data <-
   left_join(clean_data, edattain, by = "state")
 anti_join(clean_data, edattain)
+```
 
+```{r working_pop_data,  echo=T, message=F, warning=F}
 # load & add working pop data
 pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
   select(state, totpop_2018, totpop_work, pctpop_work)
@@ -211,15 +222,83 @@ pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
 clean_data <-
   left_join(clean_data, pctworkpop, by = "state")
 anti_join(clean_data, pctworkpop)
+```
 
+```{r Dem/Rep_governor,  echo=T, message=F, warning=F}
 # load & add governor party data
 party <- read_excel("data/raw/party_bystate_2020.xlsx")
 
 clean_data <-
   left_join(clean_data, party, by = "state")
 anti_join(clean_data, party)
+```
 
+
+```{r predicted_deaths_IHME_data,  echo=T, message=F, warning=F}
+# load & add governor party data
+ihme_data <- read_excel("data/raw/Covid_data_April10.xlsx")
+ihme_data$date <- as.character(ihme_data$date)
+
+ihme_data <- ihme_data %>%
+              rename(state = "location_name") %>%
+              select(state, date, deaths_mean, totdea_mean) %>%
+              filter(date == "2020-04-10")
+
+clean_data <-
+  left_join(clean_data, ihme_data, by = "state")
+anti_join(clean_data, ihme_data)
+```
+
+```{r actual_deaths_till_Apr10, echo=T, message=F, warning=F}
+
+# Loading packages
+library(httr)
+library(RCurl)
+
+# Reading the JHU Covid data from Github for April 10, 2020.
+jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-10-2020.csv"
+
+mydata <- read.csv(url(jhufile_1))
+
+jhu_data <- mydata %>%
+  rename(state = "Province_State") %>%
+  drop_na(FIPS) %>%
+  filter(Country_Region == "US") 
+
+
+jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""), ] %>%
+  select(state, Last_Update, Confirmed, Deaths, Recovered)
+
+jhu_data_final <- jhu_data %>% 
+  group_by(state) %>%
+  summarise(sum_deaths = sum(Deaths))
+
+clean_data <-
+  left_join(clean_data, jhu_data, by = "state")
+anti_join(clean_data, jhu_data)
+```
+
+
+```{r incidence_mortality_rates_Apr12, echo=T, message=F, warning=F}
+# April 12 data on rates of incidence and mortality
+jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
+
+rates_data <- read.csv(url(jhufile_2))
+
+jhu_data_1 <- rates_data %>%
+  rename(state = "Province_State") %>%
+  select(FIPS, state, Deaths, Lat, Long_, Incident_Rate, Mortality_Rate) %>%
+  filter(FIPS < 60)
+
+clean_data <-
+  left_join(clean_data, jhu_data_1, by = "state")
+anti_join(clean_data, jhu_data_1)
+```
+
+
+
+### FINAL MERGED FILE (TIDY FORMAT)
+```{r final_merge}
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
 
-We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset. We have uploaded the rough version of the data in the master repo but more merging needs to be done contingent on future discussion. As our final dataset will be ready in the next couple of days, we'll begin descriptive analysis and finalizing the features we will use in the model.
