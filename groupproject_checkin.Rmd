@@ -147,22 +147,22 @@ occ <- occ %>%
   filter(o_group == "major") %>%
   select(area_title, occ_code, occ_title, jobs_1000) %>%
   mutate(jobs_1000 = as.numeric(jobs_1000)) %>%
-  rename(state = area_title)
+  rename(state = area_title) %>%
+  group_by(state) %>%
+  mutate(rank = rank(-jobs_1000)) %>%
+  filter(rank <= 3) %>%
+  select(-jobs_1000)
 
-# change data to wide
+# change data to wide and rename vars
 occ <- occ %>% 
-  pivot_wider(names_from = occ_title, state,
-              values_from = jobs_1000)
-
-# find top industry wrt employment
-occ <- occ %>%
-  mutate(topind_emp = colnames(occ)[apply(occ, 1, which.max)]) %>%
-  select(state, topind_emp)
+  pivot_wider(names_from = rank, state,
+              values_from = occ_title) %>%
+  rename(topindemp_3 = 2, topindemp_1 = 3, topindemp_2 = 4)
 ```
 
 ATT: need further discussion since not much variance
 
-### Census
+### Census Region
 
 ```{r regions-clean, echo=T, message=F, warning=F}
 
@@ -173,13 +173,11 @@ regions <- regions %>%
   rename(state = State, region = Region)
 ```
 
-### Stay at home dates and predicted peaks by IHME model.
+### Stay at Home Date and Days Since Predicted Peak
 
 ```{r sah_clean, echo=T, message=F, warning=F}
 
-# load data
 sah <- read_excel("data/raw/stayathome.xlsx")
-
 sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
 ```
 
