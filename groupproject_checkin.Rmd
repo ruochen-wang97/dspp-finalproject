@@ -1,8 +1,12 @@
 ---
-title: "Group Project Check-in"
+title: "Unemployment Claims Data Construction"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 urlcolor: blue
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Question of Interest
@@ -13,7 +17,11 @@ We will develop different models to predict the number of unemployment claims fi
 
 We have decided on the following variables for our models:
 
+<<<<<<< HEAD
 **Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment in the labor market (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
+=======
+**Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment trends (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
+>>>>>>> 653dfdc8101bad648028082670901312f127a993
 
 **Predictors** *(all variables are at the state level)*
 
@@ -27,23 +35,39 @@ Structural predictors include:
 - Top Industry in terms of GDP Contribution
 - Democratic or Republican Governor
 
+<<<<<<< HEAD
 We are considering standardizing/normalizing/logging the populations variables due to concerns of high correlations between these variables and the outcome variable.
+=======
+We are considering standardizing/normalizing/logging the population variables due to concerns of high correlations between these variables and the outcome variable.
+>>>>>>> 653dfdc8101bad648028082670901312f127a993
 
 Real-Time Predictors include:
 
 - Number of COVID Cases
+<<<<<<< HEAD
 - Number of Days Since the issurance of Stay-at-Home Order
 - Number of Days Before the Stay-at-Home Order ends
 - Peak of Claims Predicted (we haven't found a specific data source but will keep looking)
+=======
+- Number of Days Since the Issurance of Stay-at-Home Order
+- Number of Days Before Stay-at-Home Order Ends
+- Peak of Claims Predicted *(we haven't found a data source yet but will keep looking)*
+>>>>>>> 653dfdc8101bad648028082670901312f127a993
 - Whether there has been a protest/protests in the state
 
 **Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
 
 **Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
 
+<<<<<<< HEAD
 We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data we are going to explore, this algorithm will make more accurate out-of-sample predictions as compared to KNN and CART.
 
 **Error Metric**: RMSE (OOB Error for Random Forest)
+=======
+We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data, Random Forest will make more accurate out-of-sample predictions as compared to KNN and CART.
+
+**Error Metrics**: RMSE (OOB Error for Random Forest)
+>>>>>>> 653dfdc8101bad648028082670901312f127a993
 
 ## Data Cleaning
 
@@ -54,21 +78,254 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load-packages, echo=T, message=F, warning=F}
 
+library(readxl)
+library(haven)
 library(tidyverse)
+library(tidyr)
 ```
 
-```{r topindustry_bystate, echo=T, message=F, warning=F}
+### Unemployment Claims
 
-topindustry_bystate <-
-  read.csv("data_raw/gdp_byindustry_bystate_2019.csv")
+```{r unemp-clean, echo=T, message=F, warning=F}
 
-topindustry_bystate <- topindustry_bystate %>%
+claims <- read_excel("data/raw/unemployment_bystate_weekly.xls")
+
+claims <- claims %>%
+  rename(state_name = State) %>%
+  rename_all(~str_to_lower(colnames(claims))) %>%
+  rename_all(~str_replace_all(., "\\s+", "_")) %>%
+  filter(state != "Puerto Rico" &
+           state != "Virgin Islands" ) %>%
+  select(state, reflecting_week_ended, initial_claims, continued_claims)
+
+# change data to wide
+claims <-
+  pivot_wider(data = claims,
+              names_from = reflecting_week_ended,
+              values_from = c(initial_claims, continued_claims))
+```
+
+### GDP by Industry
+
+```{r gdp-clean, echo=T, message=F, warning=F}
+
+gdp <-
+  read.csv("data/raw/gdp_bystate_byindustry_2019.csv")
+
+gdp <- gdp %>%
   filter(str_detect(string = Description,
-                    pattern = "    ")) %>%
+                    pattern = "    ")) %>% 
   filter(!str_detect(string = Description, 
-                     pattern = "     "))
+                     pattern = "     ")) %>% # remove aggregate & sub-industries
+  filter(GeoName != "United States") %>% # remove federal data
+  filter(X2019 != "(NA)" & X2019 != "(D)") %>% # remove non-numeric values
+  rename(gdp2019 = X2019, state = GeoName) # rename GDP and state variables
+
+# change data to wide
+gdp <- gdp %>% 
+  pivot_wider(names_from = Description, state,
+              values_from = gdp2019) %>%
+  filter(!state %in% c("New England", "Mideast", "Great Lakes", "Plains", "Southeast", "Southwest", "Rocky Mountain", "Far West"))
+
+# find top industry wrt gdp
+gdp <- gdp %>%
+  mutate(topind_gdp = colnames(gdp)[apply(gdp, 1, which.max)]) %>%
+  select(state, topind_gdp)
 ```
 
+### Per Capita Personal Income
+
+```{r inc-clean, echo=T, message=F, warning=F}
+
+income <- read_csv("data/raw/percapitapersonalincome_bystate_2019.csv")
+
+income <- income %>%
+  filter(as.numeric(GeoFips) >= 1000 & as.numeric(GeoFips) <= 56000) %>% # remove fed/regional data
+  rename(personal_inc2019 = "2019", state = GeoName) %>%
+  select(-GeoFips)
+```
+
+### Employment by Occupation
+
+```{r occ-clean, echo=T, message=F, warning=F}
+
+occ <- read_excel("data/raw/employment_byoccupation_bystate_may2019.xlsx")
+
+occ <- occ %>%
+  filter(o_group == "major") %>%
+  select(area_title, occ_code, occ_title, jobs_1000) %>%
+  mutate(jobs_1000 = as.numeric(jobs_1000)) %>%
+  rename(state = area_title) %>%
+  group_by(state) %>%
+  mutate(rank = rank(-jobs_1000)) %>%
+  filter(rank <= 3) %>%
+  select(-jobs_1000)
+
+# change data to wide and rename vars
+occ <- occ %>% 
+  pivot_wider(names_from = rank, state,
+              values_from = occ_title) %>%
+  rename(topindemp_3 = 2, topindemp_1 = 3, topindemp_2 = 4)
+```
+
+ATT: need further discussion since not much variance
+
+### Census Region
+
+```{r regions-clean, echo=T, message=F, warning=F}
+
+regions <- read_excel("data/raw/censusregion_bystate.xlsx")
+
+regions <- regions %>%
+  select(State, Region) %>%
+  rename(state = State, region = Region)
+```
+
+### Merge Datasets
+
+```{r merge, echo=T, message=F, warning=F}
+clean_data <-
+  left_join(claims, income, by = "state")
+anti_join(clean_data, income)
+
+clean_data <-
+  left_join(clean_data, gdp, by = "state")
+anti_join(clean_data, gdp)
+
+clean_data <-
+  left_join(clean_data, occ, by = "state")
+anti_join(clean_data, occ)
+
+clean_data <-
+  left_join(clean_data, regions, by = "state")
+anti_join(clean_data, regions)
+```
+
+```{r merge-sah-date, echo=T, message=F, warning=F}
+
+# load & add stay at home date data
+sah <- read_excel("data/raw/stayathome.xlsx")
+
+clean_data <-
+  left_join(clean_data, sah, by = "state")
+anti_join(clean_data, sah)
+```
+
+```{r merge-peak-date,  echo=T, message=F, warning=F}
+
+#load & add peak death data
+
+sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
+
+clean_data <-
+  left_join(clean_data, sah_peakdeaths, by = "state") %>%
+  rename(massgath_res_date = mg_restr,
+         noness_res_date = noness_restr)
+anti_join(clean_data, sah_peakdeaths)
+```
+
+```{r merge-ed-attainment,  echo=T, message=F, warning=F}
+
+# load & add ed attainment data
+edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
+
+clean_data <-
+  left_join(clean_data, edattain, by = "state")
+anti_join(clean_data, edattain)
+```
+
+```{r merge-working-pop,  echo=T, message=F, warning=F}
+
+# load & add working pop data
+pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
+  select(state, totpop_2018, totpop_work, pctpop_work)
+
+clean_data <-
+  left_join(clean_data, pctworkpop, by = "state")
+anti_join(clean_data, pctworkpop)
+```
+
+```{r merge-gov-party,  echo=T, message=F, warning=F}
+
+# load & add governor party data
+party <- read_excel("data/raw/party_bystate_2020.xlsx")
+
+clean_data <-
+  left_join(clean_data, party, by = "state")
+anti_join(clean_data, party)
+```
+
+```{r merge-ihme-covid-data,  echo=T, message=F, warning=F}
+
+ihme_data <- read_excel("data/raw/Covid_data_April10.xlsx")
+ihme_data$date <- as.character(ihme_data$date)
+
+ihme_data <- ihme_data %>%
+  rename(state = "location_name") %>%
+  select(state, date, deaths_mean, totdea_mean) %>%
+  filter(date == "2020-04-10")
+
+clean_data <-
+  left_join(clean_data, ihme_data, by = "state")
+anti_join(clean_data, ihme_data)
+```
+
+```{r merge-death-num-till-apr10, echo=T, message=F, warning=F}
+
+# Loading packages
+library(httr)
+library(RCurl)
+
+# Reading the JHU Covid data from Github for April 10, 2020.
+jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-10-2020.csv"
+
+mydata <- read.csv(url(jhufile_1))
+
+jhu_data <- mydata %>%
+  rename(state = "Province_State") %>%
+  drop_na(FIPS) %>%
+  filter(Country_Region == "US") 
+
+
+jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""),] %>%
+  select(state, Last_Update, Confirmed, Deaths, Recovered)
+
+jhu_data_final <- jhu_data %>% 
+  group_by(state) %>%
+  summarise(sum_deaths = sum(Deaths))
+
+clean_data <-
+  left_join(clean_data, jhu_data_final, by = "state")
+anti_join(clean_data, jhu_data_final)
+```
+
+<<<<<<< HEAD
 ## (Immediate) Next Steps
 
 We are still in the process of cleaning and merging datasets - finals week has been insane! We will meet with the instructors to finalize the variables we are to include in our models as well as the algorithms, and finish up building our final dataset.
+=======
+```{r merge-incidence-and-mortality-rate-apr12, echo=T, message=F, warning=F}
+
+# April 12 data on rates of incidence and mortality
+jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
+
+rates_data <- read.csv(url(jhufile_2))
+
+jhu_data_1 <- rates_data %>%
+  rename(state = "Province_State") %>%
+  select(FIPS, state, Deaths, Lat, Long_, Incident_Rate, Mortality_Rate) %>%
+  filter(FIPS < 60)
+
+clean_data <-
+  left_join(clean_data, jhu_data_1, by = "state")
+anti_join(clean_data, jhu_data_1)
+```
+
+### Create Final Analytical Data
+
+```{r final-merge, echo=T, message=F, warning=F}
+
+clean_data %>% write_csv("data/clean/merged.csv")
+```
+
+>>>>>>> 653dfdc8101bad648028082670901312f127a993
