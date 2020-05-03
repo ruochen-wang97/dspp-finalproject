@@ -173,14 +173,6 @@ regions <- regions %>%
   rename(state = State, region = Region)
 ```
 
-### Stay at Home Date and Days Since Predicted Peak
-
-```{r sah-clean, echo=T, message=F, warning=F}
-
-sah <- read_excel("data/raw/stayathome.xlsx")
-sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
-```
-
 ### Merge Datasets
 
 ```{r merge, echo=T, message=F, warning=F}
@@ -204,15 +196,30 @@ clean_data <-
   left_join(clean_data, regions, by = "state")
 anti_join(clean_data, regions)
 
+# load stay at home data
+sah <- read_excel("data/raw/stayathome.xlsx")
+
 clean_data <-
   left_join(clean_data, sah, by = "state")
 anti_join(clean_data, sah)
+
+#load peak death data
+
+sah_peakdeaths <- read_excel("data/raw/sah_peakdeaths.xlsx")
 
 clean_data <-
   left_join(clean_data, sah_peakdeaths, by = "state") %>%
   rename(massgath_res_date = mg_restr,
          noness_res_date = noness_restr)
 anti_join(clean_data, sah_peakdeaths)
+  left_join(clean_data, sah_peakdeaths, by = "state")
+
+# load ed attainment data
+edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
+
+clean_data <-
+  left_join(clean_data, edattain, by = "state")
+anti_join(clean_data, edattain)
 
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
