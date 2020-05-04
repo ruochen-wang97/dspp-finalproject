@@ -1,5 +1,5 @@
 ---
-title: "Unemployment Claims Data Construction"
+title: "Predicting the Number of Unemployment Insurance Claims in the Time of COVID-19"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
 output:
   html_document:
@@ -77,12 +77,12 @@ claims <- claims %>%
   rename_all(~str_replace_all(., "\\s+", "_")) %>%
   filter(state != "Puerto Rico" &
            state != "Virgin Islands" ) %>%
-  select(state, reflecting_week_ended, initial_claims, continued_claims)
+  select(state, filed_week_ended, initial_claims, continued_claims)
 
 # change data to wide
 claims <-
   pivot_wider(data = claims,
-              names_from = reflecting_week_ended,
+              names_from = filed_week_ended,
               values_from = c(initial_claims, continued_claims))
 ```
 
@@ -253,11 +253,11 @@ anti_join(clean_data, ihme_data)
 
 ```{r merge-death-num-till-apr10, echo=T, message=F, warning=F}
 
-# Loading packages
+# load packages
 library(httr)
 library(RCurl)
 
-# Reading the JHU Covid data from Github for April 10, 2020.
+# read in JHU COVID data from Github for April 10, 2020
 jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-10-2020.csv"
 
 mydata <- read.csv(url(jhufile_1))
@@ -282,7 +282,7 @@ anti_join(clean_data, jhu_data_final)
 
 ```{r merge-incidence-and-mortality-rate-apr12, echo=T, message=F, warning=F}
 
-# April 12 data on rates of incidence and mortality
+# read in JHU data on incident and mortality rates from Github for April 12, 2020
 jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
 
 rates_data <- read.csv(url(jhufile_2))
