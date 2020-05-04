@@ -235,29 +235,14 @@ clean_data <-
 anti_join(clean_data, party)
 ```
 
-```{r merge-ihme-covid-data,  echo=T, message=F, warning=F}
-
-ihme_data <- read_excel("data/raw/Covid_data_April10.xlsx")
-ihme_data$date <- as.character(ihme_data$date)
-
-ihme_data <- ihme_data %>%
-  rename(state = "location_name") %>%
-  select(state, date, deaths_mean, totdea_mean) %>%
-  filter(date == "2020-04-10")
-
-clean_data <-
-  left_join(clean_data, ihme_data, by = "state")
-anti_join(clean_data, ihme_data)
-```
-
 ```{r merge-death-num-till-apr10, echo=T, message=F, warning=F}
 
 # load packages
 library(httr)
 library(RCurl)
 
-# read in JHU COVID data from Github for April 10, 2020
-jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-10-2020.csv"
+# read in JHU COVID data from Github for April 18, 2020
+jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-18-2020.csv"
 
 mydata <- read.csv(url(jhufile_1))
 
@@ -265,7 +250,6 @@ jhu_data <- mydata %>%
   rename(state = "Province_State") %>%
   drop_na(FIPS) %>%
   filter(Country_Region == "US") 
-
 
 jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""),] %>%
   select(state, Last_Update, Confirmed, Deaths, Recovered)
@@ -281,12 +265,13 @@ anti_join(clean_data, jhu_data_final)
 
 ```{r merge-incidence-and-mortality-rate-apr12, echo=T, message=F, warning=F}
 
-# read in JHU data on incident and mortality rates from Github for April 12, 2020
-jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
+# read in JHU data on incident and mortality rates from Github for April 18, 2020
+jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-18-2020.csv"
 
 rates_data <- read.csv(url(jhufile_2))
 
 jhu_data_1 <- rates_data %>%
+  filter(Country_Region == "US") %>%
   rename(state = "Province_State") %>%
   select(FIPS, state, Deaths, Lat, Long_, Incident_Rate, Mortality_Rate) %>%
   filter(FIPS < 60)
