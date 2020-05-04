@@ -257,7 +257,8 @@ jhu_data <- jhu_data[!(is.na(jhu_data$Admin2) | jhu_data$Admin2==""),] %>%
 
 jhu_data_final <- jhu_data %>% 
   group_by(state) %>%
-  summarise(sum_deaths = sum(Deaths))
+  summarise(sum_deaths = sum(Deaths),
+            sum_conf = sum(Confirmed))
 
 clean_data <-
   left_join(clean_data, jhu_data_final, by = "state")
@@ -274,7 +275,7 @@ rates_data <- read.csv(url(jhufile_2))
 jhu_data_1 <- rates_data %>%
   filter(Country_Region == "US") %>%
   rename(state = "Province_State") %>%
-  select(FIPS, state, Deaths, Lat, Long_, Incident_Rate, Mortality_Rate) %>%
+  select(FIPS, state, Confirmed, Deaths, Lat, Long_, Incident_Rate, Mortality_Rate) %>%
   filter(FIPS < 60)
 
 clean_data <-
