@@ -62,6 +62,7 @@ library(readxl)
 library(haven)
 library(tidyverse)
 library(tidyr)
+library(ggplot2)
 ```
 
 ### Unemployment Claims
@@ -290,7 +291,45 @@ clean_data %>% write_csv("data/clean/merged.csv")
 
 ## Descriptive Analysis
 
-```{r }
+```{r make-line-graph, echo=T, message=F, warning=F}
 
+# build line graph data
+line_data <- clean_data %>%
+  select(state, 'initial_claims_2020-01-25':'initial_claims_2020-04-18', Incident_Rate) %>%
+  mutate(rank = rank(-Incident_Rate)) %>%
+  filter(rank <=5) %>%
+  gather(key = week_ended, value = initialclaims, 2:14) %>%
+  mutate(week_ended = sub("initial_claims_", "", week_ended)) %>%
+  mutate(week_ended = as.Date(week_ended))
+
+# make line graph
+state_rank <- c("New York",
+                "New Jersey",
+                "Massachusetts",
+                "Louisiana",
+                "Connecticut")
+line_data$state <- factor(line_data$state, state_rank)
+
+ggplot(data = line_data,
+       mapping = aes(x = week_ended,
+                     y = initialclaims,
+                     group = state,
+                     color = state)) +
+  scale_x_date(date_breaks = "1 week") +
+  geom_line() +
+  geom_vline(xintercept = as.Date("2020-03-19"), linetype = 2) +
+  theme_classic() +
+  labs(title = "Weekly Unemployment Insurance Claims in Top 5 States\nwith Highest COVID-19 Incidence Rate",
+       caption = "Source: US Department of Labor & Johns Hopkins University Center for Systems Science and Engineering",
+       x = "Week Ending",
+       y = "Number of Initial Claims") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
+        plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -4),
+        axis.title.x = element_text(family = "Arial", vjust = -4),
+        axis.title.y = element_text(family = "Arial", vjust = .5),
+        axis.text.x = element_text(angle = 45, family = "Arial", vjust =-.05),
+        axis.text.y = element_text(family = "Arial"),
+        axis.ticks.x = element_blank())
 ```
 
