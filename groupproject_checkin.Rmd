@@ -63,6 +63,7 @@ library(haven)
 library(tidyverse)
 library(tidyr)
 library(ggplot2)
+library(treemapify)
 ```
 
 ### Unemployment Claims
@@ -320,16 +321,54 @@ ggplot(data = line_data,
   geom_vline(xintercept = as.Date("2020-03-19"), linetype = 2) +
   theme_classic() +
   labs(title = "Weekly Unemployment Insurance Claims in Top 5 States\nwith Highest COVID-19 Incidence Rate",
-       caption = "Source: US Department of Labor & Johns Hopkins University Center for Systems Science and Engineering",
+       caption = "Source: US Department of Labor & Johns Hopkins University",
        x = "Week Ending",
        y = "Number of Initial Claims") +
   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
         plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
         plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -4),
-        axis.title.x = element_text(family = "Arial", vjust = -4),
+        axis.title.x = element_text(family = "Arial", vjust = -2),
         axis.title.y = element_text(family = "Arial", vjust = .5),
-        axis.text.x = element_text(angle = 45, family = "Arial", vjust =-.05),
+        axis.text.x = element_text(angle = 45, size = 7, family = "Arial", hjust = 1),
         axis.text.y = element_text(family = "Arial"),
         axis.ticks.x = element_blank())
+```
+
+```{r make-treemap, echo=T, message=F, warning=F}
+
+# build treemap data
+treemap_data <- clean_data %>%
+  select(state, region, `initial_claims_2020-04-18`, `continued_claims_2020-04-18`, Incident_Rate) %>%
+  mutate(`totclaims_2020_04_18` = `continued_claims_2020-04-18` + `initial_claims_2020-04-18`) %>%
+  select(state, region, `totclaims_2020_04_18`, Incident_Rate) %>%
+  write_csv("treemap.csv")
+
+# make treemap
+ggplot(data = treemap_data,
+       mapping = aes(area = `totclaims_2020_04_18`,
+                     fill = Incident_Rate,
+                     label = `state`,
+                     subgroup = region)) +
+  geom_treemap() +
+  geom_treemap_subgroup_border(color = "white") +
+  geom_treemap_text(color = "white",
+                    place = "center",
+                    grow = F,
+                    reflow = T) +
+  geom_treemap_subgroup_text(color = "#FAFAFA",
+                             place = "center",
+                             grow = T,
+                             alpha = .5,
+                             min.size = 0) +
+  scale_fill_gradient(low = "#fdbb84", high = "#b30000",
+                      breaks = seq(50, 1500, by = 500),
+                      name = "Number of COVID Cases\nper 100,000 Residents") +
+  labs(title = "Total Unemployment Insurance Claims Filed, as of April 18",
+       caption = "Source: US Department of Labor & Johns Hopkins University") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 2),
+        plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -2),
+        legend.title = element_text(size = 9, family = "Arial", vjust = 4),
+        legend.text = element_text(family = "Arial"))
 ```
 
