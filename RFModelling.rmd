@@ -95,8 +95,8 @@ rf_fit
 
 # Make predictions on the test data
 pred_results <- predict(train.data,
-                       test.data,
-                       type = "raw")
+                        test.data,
+                        type = "raw")
 
 pred_df <- data.frame(pred_results)
 
