@@ -1,5 +1,5 @@
 ---
-title: "Unemployment Claims Data Construction"
+title: "Predicting the Number of Unemployment Insurance Claims in the Time of COVID-19"
 author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
 output:
   html_document:
@@ -272,11 +272,11 @@ anti_join(clean_data, ihme_data)
 
 ```{r merge-death-num-till-apr10, echo=T, message=F, warning=F}
 
-# Loading packages
+# load packages
 library(httr)
 library(RCurl)
 
-# Reading the JHU Covid data from Github for April 10, 2020.
+# read in JHU COVID data from Github for April 10, 2020
 jhufile_1 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-10-2020.csv"
 
 mydata <- read.csv(url(jhufile_1))
@@ -306,7 +306,7 @@ We are still in the process of cleaning and merging datasets - finals week has b
 =======
 ```{r merge-incidence-and-mortality-rate-apr12, echo=T, message=F, warning=F}
 
-# April 12 data on rates of incidence and mortality
+# read in JHU data on incident and mortality rates from Github for April 12, 2020
 jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-12-2020.csv"
 
 rates_data <- read.csv(url(jhufile_2))
@@ -319,6 +319,15 @@ jhu_data_1 <- rates_data %>%
 clean_data <-
   left_join(clean_data, jhu_data_1, by = "state")
 anti_join(clean_data, jhu_data_1)
+```
+
+```{r merge-apr18-unemploy-data, echo=T, message=F, warning=F}
+
+unemp_apr18 <- read_excel("data/raw/unemployment_bystate_w4.18.xlsx")
+
+clean_data <-
+  left_join(clean_data, unemp_apr18, by = "state")
+anti_join(clean_data, unemp_apr18)
 ```
 
 ### Create Final Analytical Data
