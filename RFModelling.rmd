@@ -13,6 +13,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+### Details about the dataset 
+
+
 ### Loading required R packages
 ```{r load packages}
 library(tidyverse)
@@ -23,40 +26,53 @@ library(ggplot2)
 library(ggthemes)
 library(dplyr) 
 library(lubridate) # for manipulation of dates
-library(rpart) # rpart for imputation
+library(rpart) 
+library(rsample)
+library(recipes)
+library(parsnip)
+library(yardstick)
 
 ```
 
-### Loading abd Preparing data
+### Loading and Preparing data
 
 ```{r Load data}
 
 # Load the data
 merged <- read_csv("data/clean/merged.csv")
+head(merged)
+str(merged) # to get the structure of the datatset
 
 # Inspect the data
-
+summary(merged)
 
 # Split the data into training and test set
-set.seed(123)
-training.samples <- merged$`initial_claims_2020-04-11` %>%
-  createDataPartition(p = 0.8, list = FALSE)
-train.data  <- merged[training.samples, ]
-test.data <- merged[-training.samples, ]
+set.seed(1234)
 
-# Check for NA and Applying na.roughfix to replace NAs with column medians
+# Create a split object - in ratio of 80:20
+split <- initial_split(merged, prop = 0.8)
 
-train.data <- na.roughfix(df_train)
-test.data <- na.roughfix(df_test)
-
-sum(is.na(train.data)) # should be zero
-
+# Using split object to create testing and training data
+train.data <- training(split)
+test.data <- testing(split)
 ```
 
 
 ### Pre-processing the data
 
 ```{r data pre-process}
+
+# Simulating a dataset containing missing values
+Y <- merged$`initial_claims_2020-04-04`    ## target variable
+X <- merged[, 2:4] ## predictors
+
+# Method to deal with missing values
+
+# median imputation/knn imputation
+train(X, Y, preProcess = "medianImpute")
+train(X, Y, preProcess = "knnImpute")
+
+
 
 ```
 
@@ -67,21 +83,38 @@ sum(is.na(train.data)) # should be zero
 # Fit the model on the training set
 set.seed(123)
 
-model <- train(medv ~., 
-               data = train.data, 
-               method = "rf",
-  trControl = trainControl("repeatedcv", number = 10)
-  )
-
-model
-
-# OR 
-
-rf_fit <- train(as.factor(`initial_claims_2020-04-04`) ~ ., 
+# Using train function from caret package: training a random forest model by using 10-fold repeated cross validation, and setting a tuneLength of 10. Default metric is RMSE.
+rf_fit <- train(as.factor(`initial_claims_2020-04-18`)~ ., 
                 data = train.data, 
-                method = "ranger")
+                method = "ranger",
+                tunelength = 10,
+                ntree = 500, # is this valid given the small sample size
+                search = "random",  # should we do this - my understanding is that it selects parameters randomly
+                trControl = trainControl(method = "repeatedcv",
+                                         repeats = 10,
+                                         verboseIter = FALSE))
 
-rf_fit
+print(rf_fit)
+plot(rf_fit)
+
+
+# training a KNN model by using 10-fold repeated cross validation, and setting a tuneLength of 10. Default metric is RMSE.
+
+knn_fit <- train(as.factor(`initial_claims_2020-04-18`) ~ ., 
+                data = train.data, 
+                method = "knn",
+                tunelength = 10,
+                search = "random",  # should we do this - my understanding is that it selects parameters randomly
+                trControl = trainControl(method = "repeatedcv",
+                                         repeats = 10,
+                                         verboseIter = FALSE))
+print(knn_fit)
+plot(knn_fit)
+
+#Model error
+plot(rf_fit, ylim=c(0,1))
+legend('topright', colnames(rf_fit$err.rate), col=1:6, fill=1:6)
+
 ```
 
 ### ### Tuning the parameters - Best tuning parameter mtry - i don't quite understand this
@@ -96,7 +129,7 @@ rf_fit
 # Make predictions on the test data
 pred_results <- predict(train.data,
                         test.data,
-                        type = "raw")
+                        type = "raw") # generates predictions in terms of raw numbers or classes.
 
 pred_df <- data.frame(pred_results)
 
