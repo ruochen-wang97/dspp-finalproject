@@ -76,12 +76,12 @@ claims <- claims %>%
   rename_all(~str_replace_all(., "\\s+", "_")) %>%
   filter(state != "Puerto Rico" &
            state != "Virgin Islands" ) %>%
-  select(state, reflecting_week_ended, initial_claims, continued_claims)
+  select(state, filed_week_ended, initial_claims, continued_claims)
 
 # change data to wide
 claims <-
   pivot_wider(data = claims,
-              names_from = reflecting_week_ended,
+              names_from = filed_week_ended,
               values_from = c(initial_claims, continued_claims))
 ```
 
@@ -294,15 +294,6 @@ jhu_data_1 <- rates_data %>%
 clean_data <-
   left_join(clean_data, jhu_data_1, by = "state")
 anti_join(clean_data, jhu_data_1)
-```
-
-```{r merge-apr18-unemploy-data, echo=T, message=F, warning=F}
-
-unemp_apr18 <- read_excel("data/raw/unemployment_bystate_w4.18.xlsx")
-
-clean_data <-
-  left_join(clean_data, unemp_apr18, by = "state")
-anti_join(clean_data, unemp_apr18)
 ```
 
 ### Create Final Analytical Data
