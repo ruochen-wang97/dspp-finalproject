@@ -63,6 +63,12 @@ library(haven)
 library(tidyverse)
 library(tidyr)
 library(ggridges)
+library(rsample)
+library(recipes)
+library(parsnip)
+library(yardstick)
+library(ranger)
+library(stringr)
 ```
 
 ### Unemployment Claims
@@ -289,4 +295,116 @@ anti_join(clean_data, jhu_data_1)
 
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
+
+
+```{r Load data}
+
+# Load the data
+merged <- read_csv("data/clean/merged.csv") 
+
+head(merged)
+str(merged) # to get the structure of the datatset
+
+# Inspect the data
+summary(merged)
+
+# Split the data into training and test set
+set.seed(1234)
+
+# Create a split object - in ratio of 80:20
+split <- initial_split(merged, prop = 0.8)
+
+# Using split object to create testing and training data
+train.data <- training(split)
+test.data <- testing(split)
+
+data_resamples <- vfold_cv(data = train.data, v = 10)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r density-plot}
+# create variable for peak since April 18th
+
+clean_data <- clean_data %>%
+  mutate(peak = days_since_peak_deaths - 11) 
+
+# this plot shows the distribution of days since peak deaths (as of april 18th) divided by region
+
+ggplot(data = clean_data, mapping = aes(x = peak, y = as.factor(region))) +
+  geom_density_ridges(fill = "#1696d2") +
+  labs(title = 
+         paste("Distribution of Days Since Coronavirus Peak Deaths by Region"),
+       caption = "Source:???",
+       x = "Days since peak deaths",
+       y = "Region") +
+  theme_minimal() 
+  
+```
+
+
+```{r}
+clean_data %>%
+  mutate(perc_claim = (`continued_claims_2020-04-18`/totpop_2018) * 100) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = perc_claim, y = Incident_Rate, color = as.character(gov_republican)))
+
+
+```
+
+
 
