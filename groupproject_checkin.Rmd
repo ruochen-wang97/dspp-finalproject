@@ -373,3 +373,34 @@ ggplot(data = treemap_data,
         legend.text = element_text(family = "Arial"))
 ```
 
+
+```{r density-plot}
+# create variable for peak since April 18th
+
+clean_data <- clean_data %>%
+  mutate(peak = days_since_peak_deaths - 11) 
+
+# this plot shows the distribution of days since peak deaths (as of april 18th) divided by region
+
+ggplot(data = clean_data, mapping = aes(x = peak, y = as.factor(region))) +
+  geom_density_ridges(fill = "#1696d2") +
+  labs(title = 
+         paste("Distribution of Days Since Coronavirus Peak Deaths by Region"),
+       caption = "Source:???",
+       x = "Days since peak deaths",
+       y = "Region") +
+  theme_minimal() 
+  
+```
+
+
+```{r}
+clean_data %>%
+  mutate(perc_claim = (`continued_claims_2020-04-18`/totpop_2018) * 100) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = perc_claim, y = Incident_Rate, color = as.character(gov_republican)))
+
+
+```
+
+
