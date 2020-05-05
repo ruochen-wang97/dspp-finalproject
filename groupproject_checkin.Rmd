@@ -64,6 +64,7 @@ library(tidyverse)
 library(tidyr)
 library(ggplot2)
 library(treemapify)
+library(ggridges)
 ```
 
 ### Unemployment Claims
@@ -288,6 +289,11 @@ anti_join(clean_data, jhu_data_1)
 
 ```{r final-merge, echo=T, message=F, warning=F}
 
+# remove white space from variable names
+names(clean_data) <- str_replace(names(clean_data), "-", "_") 
+names(clean_data) <- str_replace(names(clean_data), "-", "_") 
+
+
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
 
@@ -297,11 +303,18 @@ clean_data %>% write_csv("data/clean/merged.csv")
 
 # build line graph data
 line_data <- clean_data %>%
-  select(state, 'initial_claims_2020-01-25':'initial_claims_2020-04-18', Incident_Rate) %>%
+  select(state, 'initial_claims_2020_01_25':'initial_claims_2020_04_18', Incident_Rate) %>%
   mutate(rank = rank(-Incident_Rate)) %>%
-  filter(rank <=5) %>%
+  filter(rank <=5)
+
+names(line_data) <- str_replace(names(line_data), "_", "-") 
+names(line_data) <- str_replace(names(line_data), "_", "-") 
+names(line_data) <- str_replace(names(line_data), "_", "-") 
+names(line_data) <- str_replace(names(line_data), "_", "-") 
+
+line_data_date <- line_data %>%
   gather(key = week_ended, value = initialclaims, 2:14) %>%
-  mutate(week_ended = sub("initial_claims_", "", week_ended)) %>%
+  mutate(week_ended = sub("initial-claims-", "", week_ended)) %>%
   mutate(week_ended = as.Date(week_ended))
 
 # make line graph
@@ -312,7 +325,7 @@ state_rank <- c("New York",
                 "Connecticut")
 line_data$state <- factor(line_data$state, state_rank)
 
-ggplot(data = line_data,
+ggplot(data = line_data_date,
        mapping = aes(x = week_ended,
                      y = initialclaims,
                      group = state,
@@ -339,8 +352,8 @@ ggplot(data = line_data,
 
 # build treemap data
 treemap_data <- clean_data %>%
-  select(state, region, `initial_claims_2020-04-18`, `continued_claims_2020-04-18`, Incident_Rate) %>%
-  mutate(`totclaims_2020_04_18` = `continued_claims_2020-04-18` + `initial_claims_2020-04-18`) %>%
+  select(state, region, `initial_claims_2020_04_18`, `continued_claims_2020_04_18`, Incident_Rate) %>%
+  mutate(`totclaims_2020_04_18` = `continued_claims_2020_04_18` + `initial_claims_2020_04_18`) %>%
   select(state, region, `totclaims_2020_04_18`, Incident_Rate) %>%
   write_csv("treemap.csv")
 
@@ -389,16 +402,39 @@ ggplot(data = clean_data, mapping = aes(x = peak, y = as.factor(region))) +
        caption = "Source:???",
        x = "Days since peak deaths",
        y = "Region") +
-  theme_minimal() 
+  theme_minimal() +
+   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 2),
+        plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -2),
+        legend.title = element_text(size = 9, family = "Arial", vjust = 4),
+        legend.text = element_text(family = "Arial")) 
   
 ```
 
 
 ```{r}
 clean_data %>%
-  mutate(perc_claim = (`continued_claims_2020-04-18`/totpop_2018) * 100) %>%
+  mutate(perc_claim = (`continued_claims_2020_04_18`/totpop_2018) * 100) %>%
   ggplot() +
-  geom_point(mapping = aes(x = perc_claim, y = Incident_Rate, color = as.character(gov_republican)))
+  geom_point(mapping = aes(x = perc_claim, y = Incident_Rate, 
+                           color = as.character(gov_republican)),
+             alpha = 0.5) + 
+  scale_color_manual(name = "Party of State Governor",
+                       labels = c("Democrat", "Republican"), 
+                     values = c("blue", "red")) +
+  labs(title = 
+         paste("Distribution of Days Since Coronavirus Peak Deaths by Region"),
+       caption = "Source:???",
+       x = "Percentage of work force that filed claims",
+       y = "Incidence Rate") + 
+  theme_minimal() +
+  theme(panel.grid.major = element_line(linetype = "dotted")) +
+  theme(panel.grid.minor = element_line(linetype = "dotted")) +
+   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 2),
+        plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -2),
+        legend.title = element_text(size = 9, family = "Arial", vjust = 4),
+        legend.text = element_text(family = "Arial")) 
 
 
 ```
