@@ -60,20 +60,22 @@ We constructed a Random Forest (RF) model to predict the number of new unemploym
   +  **Data From:** Week ending Janurary 25, when first COVID case was reported in the US
   +  **# of Features at Each Split:** 5
   +  **# of Trees:** 500
-<p>&nbsp;</p>
+  
 * **Model 2**: Random Forest
 
   +  **Data From:** Week ending March 7, when the first COVID-related death was discovered in the US (see [here](https://www.npr.org/sections/coronavirus-live-updates/2020/04/22/840836618/1st-known-u-s-covid-19-death-was-on-feb-6-a-post-mortem-test-reveals))
   +  **# of Features at Each Split:** 5
   +  **# of Trees:** 100
-<p>&nbsp;</p>
-* **Model 3**: Random Forest
 
+* **Model 3**: Random Forest
+  
   +  **Data From:** Week ending March 21, when the first stay-at-home order was issued in California
   +  **# of Features at Each Split:** 5
   +  **# of Trees:** 100
-<p>&nbsp;</p>
+
 * **Error Metric**: Root Mean Square Error (RMSE). We decided to use RMSE because the outcome we are predicting is a regression problem.
+
+We decided that Model 1 is the best model given that it has the lowest error rate.
 
 ## Discussion
 
