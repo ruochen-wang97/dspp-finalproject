@@ -1,4 +1,4 @@
-**Predicting Initial Unemployment Insurance Claims for last week of April using k-Nearest Neighbor and Random Forest Models.**
+**Predicting Initial Unemployment Insurance Claims for third week of April using k-Nearest Neighbor and Random Forest Models.**
 =====
 
  _By Radhika Kaul, Odiche Nwabuikwu, and Ruochen Wang_
@@ -51,29 +51,31 @@ _Real-time Variables_
 
 We plan to conduct a model comparison for prediction of number of unemployment insurance claims filed in 4th week of April: Following are the models we shall apply on our training data:
 
-- **Training-Testing Split**: 80:20
+- **Training-Testing Split**: 80:20 Split of the training and testing data. Since this is a time-series machine learning model, we shall keep all the variables except the initial_claims_2020_04_18 in the training data and compare our predictions to the actual values in the testing data which will have the initial_claims_2020_04_18 variable. 
 
 - **Resampling Method for training data**: k-fold cross validation. Reading of the mechanism suggests that for smaller sample size, 10-fold CV repeated 5 or 10 times will improve the accuracy of your estimated performance. Bootstrapping (random sample of the data taken with replacement) seems to work better than k-fold CV due to less variability in the error measure, however, may increase the bias on the error estimate. Since ours is a really small sample, there is a higher likelihood of us running into that disadvantage.
 
-- **Target Variable**: 
+- **Target Variable**: The target variable in our training set will be  _initial-claims-2020-04-11_, that is the number of initial claims filed in the week of April 11.
 
-- **Predictors**: 
+- **Predictors**: All the variables except FIPS, Lat, Long_
 
-- **Model 1**: K-Nearest Neighbor
+- **Model 1**: K-Nearest Neighbor - In this model, when a new sample is predicted, _k_ training set points are found that bears the almost same resemblance to the new sample being predicted. This algorithm is simple and easy to implement and is highly locally interpretable. Higher values of _k_ may result in lower RMSEs but may also run into the risk of overfitting the model.
+
     1) Selection 1: when k = 10
     2) Selection 2: when k = 25
     3) Selection 3: when k = 50
     
-- **Model 2**: Random Forest
+- **Model 2**: Random Forest - In this model, a large number of _de-correlated_ trees, with pre-specified targets and features are used to generate predictions. More trees usually allude to the model having greater accuracy. It also does a good job in reducing the bias and the variance of the error metric.
+
     1) Selection 1: when mtry = 5,  ntree = 50
     2) Selection 2: when mtry = 20, ntree = 100
     3) Selection 3: when mtry = 50, ntree = 400
     
-- **Error Metric**: Root Mean Square Error
+- **Error Metric**: Root Mean Square Error - why are we using this.
     
 
 
-[^1]: _This calculation is based on the projections made by the Institute for Health Metrics and Evaluation (when it was last updated on April 29th). This [report](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) gives us the exact dates the peaks were predicted by the IHME model. And since we are assuming we are in the 3rd week of April, we make these calculations accordingly.However, because these are just projections and not actual values and with [new](https://news.utexas.edu/2020/04/17/new-model-forecasts-9-states-likely-to-see-peak-in-covid-19-deaths-by-end-of-april/) COVID-19 models coming up, such as the one developed by researchers at the [University of Texas-Austin](https://covid-19.tacc.utexas.edu/projections/) using geolocation data from cellphones. In turn, they try to see how the state-level social distancing measures can be used to project number of COVID-19 deaths per day, along with associated probabilities of whether the peak has reached or not._
+[^1]: _This calculation is based on the projections made by the Institute for Health Metrics and Evaluation (when it was last updated on April 29th). IHME no longer reports projected peak date. This [report](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) gives us the exact dates the peaks were predicted by the IHME model. And since we are assuming we are in the 3rd week of April, we make these calculations accordingly.However, because these are just projections and not actual values and with [new](https://news.utexas.edu/2020/04/17/new-model-forecasts-9-states-likely-to-see-peak-in-covid-19-deaths-by-end-of-april/) COVID-19 models coming up, such as the one developed by researchers at the [University of Texas-Austin](https://covid-19.tacc.utexas.edu/projections/) using geolocation data from cellphones. In turn, they try to see how the state-level social distancing measures can be used to project number of COVID-19 deaths per day, along with associated probabilities of whether the peak has reached or not._
 
 
 
