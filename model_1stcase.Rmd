@@ -241,12 +241,24 @@ bind_cols(
 
 ```{r residual-viz}
 
+#creating a factor vector of the STATE names to 
+claims_testing$state <- factor(claims_testing$state)
+#reverse the order of the STATEs
+library(forcats)
+claims_testing$state_order <- fct_rev(claims_testing$state)
+
 # dumbbell plot for showing actual and predicted values for testing data
 ggplot() + 
-  geom_dumbbell(data = claims_testing, mapping = aes(x = initial_num, xend = .pred, y = state),
+  geom_dumbbell(data = claims_testing, 
+                mapping = aes(x = initial_num, xend = .pred, y = state_order),
                 size=1.3, color="#e3e2e1", 
                 colour_x = "blue", colour_xend = "orange",
                 dot_guide=FALSE, show.legend = TRUE) +
+  #geom_point(data = claims_testing, aes(x = initial_num, 
+                                        #color = group), size = 3)
+    labs(title = "Difference between actual claims and claimed predicted by ML algorithm",
+       x = "Initial Claims (April 18,2020)",
+       y = "State")+
   theme_bw()
 
 ### Residual Plots for Testing and Training Data
