@@ -53,13 +53,9 @@ We constructed a Random Forest (RF) model to predict the number of new unemploym
 
 - **Resampling**: bootstrap
 
-- **Target Variable**: The target variable in our training set will be  _initial-claims-2020-04-11_, that is the number of initial claims filed in the week of April 11.
+- **Outcome Variable**: _initial_num_
 
-- **Model 1**: K-Nearest Neighbor - In this model, when a new sample is predicted, _k_ training set points are found that bears the almost same resemblance to the new sample being predicted. This algorithm is simple and easy to implement and is highly locally interpretable. Higher values of _k_ may result in lower RMSEs but may also run into the risk of overfitting the model.
-
-    1) Selection 1: when k = 10
-    2) Selection 2: when k = 25
-    3) Selection 3: when k = 50
+- **Model 1**: 
     
 - **Model 2**: Random Forest - In this model, a large number of _de-correlated_ trees, with pre-specified targets and features are used to generate predictions. More trees usually allude to the model having greater accuracy. It also does a good job in reducing the bias and the variance of the error metric.
 

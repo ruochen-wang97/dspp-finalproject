@@ -147,14 +147,14 @@ claims_resamples <- claims_resamples %>%
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 5,
-                                           tree = 50))
+                                           tree = 100))
   ) %>%
   mutate(
     rmse_rf_2 = map_dbl(.x = splits,
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 10,
-                                           tree = 50))
+                                           tree = 100))
   ) %>%
   mutate(
     rmse_rf_3 = map_dbl(.x = splits,
@@ -204,7 +204,7 @@ claims_resamples %>%
 model_final <-
   rand_forest(mode = "regression",
               mtry = 5,
-              trees = 500) %>%
+              trees = 100) %>%
   set_engine("ranger",
              importance = "impurity") %>%
   fit(initial_num ~

@@ -85,7 +85,7 @@ recipe_claims <- recipe(formula = initial_num ~ continued_num +
   prep()
 
 # create 10-fold
-claims_resamples <- vfold_cv(data = claims_training, v = 10)
+claims_resamples <- bootstraps(data = claims_training, times = 10)
 ```
 
 ```{r create-custom-function-for-resamples, echo=T, message=F, warning=F}
@@ -147,14 +147,14 @@ claims_resamples <- claims_resamples %>%
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 5,
-                                           tree = 50))
+                                           tree = 100))
   ) %>%
   mutate(
     rmse_rf_2 = map_dbl(.x = splits,
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 10,
-                                           tree = 50))
+                                           tree = 100))
   ) %>%
   mutate(
     rmse_rf_3 = map_dbl(.x = splits,
@@ -204,7 +204,7 @@ claims_resamples %>%
 model_final <-
   rand_forest(mode = "regression",
               mtry = 5,
-              trees = 50) %>%
+              trees = 100) %>%
   set_engine("ranger",
              importance = "impurity") %>%
   fit(initial_num ~
