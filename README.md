@@ -1,51 +1,51 @@
-**Predicting Initial Unemployment Insurance Claims for third week of April using k-Nearest Neighbor and Random Forest Models.**
+**Predicting the Number of New Unemployment Insurance Claims Filed for the Week Ending April 18**
 =====
 
- _By Radhika Kaul, Odiche Nwabuikwu, and Ruochen Wang_
+ _By Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang_
 
-### Introduction
-In the midst of the COVID-19 pandemic, various states have issued mass gathering restrictons and stay-at-home orders to prevent further spread of the disease. The unintended consequence of these strict measures have hit the labor market. Official federal estimates suggest that the largest surge in new unemployment insurance claims in U.S were experienced in late March, due to widespread social distancing measures. Understanding these surges at the state-level has value to the policymakers, especially in the trying times when increasing number of workers are being furloughed (this line is weird, better way to phrase it?). 
+## Introduction
+In face of the COVID-19 pandemic, many states in the United States have issued stay-at-home orders or mass gathering restrictions to prevent further spread of the disease. The unintended consequences of these restrictions have hit the labor market. Data from the federal government shows that following the enforcement of social distancing measures, late March has seen the largest surge in the filing of new unemployment insurance claims in the modern US history.
 
-For our project, we constructed a datatset combining variables from various sources: data on unemployemnt insurance claims until the week of April 18 was gathered from the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp), managed by the U.S. Department of Labor (DOL)'s Employment & Training Administration. COVID-19 related data was gather from two sources: [Institute for Health Metrics and Evaluation](http://www.healthdata.org/), an independent global health research centre at the University of Washington and the [COVID-19 Tracking data repository](https://github.com/CSSEGISandData/COVID-19) operated by Johns Hopkins University. We attempt to conduct a supervised machine learning exercise and predict the state-level unemployment insurance claims using k-Nearest Neighbour and Random Forest models. 
+Understanding these surges at the state level has important policy implications as lay-offs and furloughs prevail in the labor market. This project aims to create a supervised machine learning model that predicts the number of new unemployment insurance claims filed per week to inform policymakers on the labor market trends in the immediate future.
 
-**Note**: _Official federal data on initial claims come out at a weekly interval and at a lag, so we assume to situate our models back in time  when we're still in the third week of April_
+## Data
 
+The data we used in constructing the model span from the week ending March 21, when California became the first state to issue an stay-at-home order, to the week ending April 18, when the latest federal data are available.
 
-### Data Description
+The predicted and predictors variables in our dataset are from the following sources:
 
-Following is the codebook we created for our dataset:
+- [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp), administered by the U.S. Department of Labor (DOL)'s Employment & Training Administration
+- COVID-19 tracking data from the [COVID-19 Data Repository](https://github.com/CSSEGISandData/COVID-19), administered by CSSE at Johns Hopkins University
+- COVID-19 projection data from the [Institute for Health Metrics and Evaluation](http://www.healthdata.org/) at the University of Washington
+- State-level structural data from the [U.S. Census Bureau](https://www.census.gov)
+
+### Codebook
+
+_Real-time Variables_
+
+- **initial_num**: Number of first time claims filed an individual after job loss (weekly estimates)
+- **continued_num**: Number of insured unemployed workers filing for UI benefits (wwekly estimates)
+- **days_since_sah**: 
+- **days_since_peak[^1]**: number of days between last day of week and  predicted death peak according to IHME
+- **reopen_date**: Stay at home order end dates
+- **sum_conf**: cummulative COVID-19 deaths by April 18, 2020
+- **sum_death**: cummulative COVID-19 confirmed cases deaths by April 18, 2020
+- **Incident_Rate**: Confirmed cases per 100,000 people
+- **Mortality_Rate**: Number recorded deaths * 100/ Number confirmed cases
 
 _Structural Variables_
 
-- **State**: State
-- **personal_inc2019**: Personal income in 2019 (state-level)
+- **region**: census region
 - **topind_gdp**: Top industry contributing to GDP
 - **topindemp_1**: 
 - **topindemp_2**: 
 - **topindemp_3**:
-- **region**: Region in the US
-- **pctpop_hs**: Percent population with a HS degree
 - **totpop_2018**: Total population in 2018
-- **totpop_work**: Total working population
 - **pctpop_work**: Percent working population
+- **pctpop_hs**: Percent population with a HS degree
 - **gov_republican**: Democratic or Republican governor
-- **FIPS**: State FIPS code
+- **personal_inc2019**: Personal income in 2019 (state-level)
 
-_Real-time Variables_
-
-- **initial_claims**: Number of first time claims filed an individual after job loss (weekly estimates)
-- **continued_claims**: Number of insured unemployed workers filing for UI benefits (wwekly estimates)
-- **sah_date**: Stay at home order start dates
-- **massgath_res_date**: Mass gathering restriction start dates
-- **noness_res_date**: Non-essential businesses closure date
-- **days_since_peak_deaths[^1]**: Days since predicted peak by IHME model
-- **reopen_date**: Stay at home order end dates
-- **peak_death_yn**: Whether state has experienced a peak in COVID-19 deaths
-- **sah_yn**: Whether the state issue a stay-at-home order date
-- **Confirmed**: cummulative COVID-19 deaths by April 18, 2020
-- **Deaths**: cummulative COVID-19 confirmed cases deaths by April 18, 2020
-- **Incident_Rate**: Confirmed cases per 100,000 people
-- **Mortality_Rate**: Number recorded deaths * 100/ Number confirmed cases
 
 ### The Modelling Process
 

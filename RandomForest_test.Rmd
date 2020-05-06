@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-packages, echo=T, message=F, warning=F}
 
 library(haven)
+library(readxl)
 library(tidyverse)
 library(lubridate)
 library(rsample)
@@ -20,7 +21,6 @@ library(recipes)
 library(parsnip)
 library(yardstick)
 library(ranger)
-library(readxl)
 ```
 
 ```{r reshape-data, echo=T, message=F, warning=F}
@@ -31,26 +31,33 @@ date_var <- read_excel("abc.xlsx")
 
 # reshape data to long (kind of)
 initial_long <- claims_data %>%
-  pivot_longer(cols = initial_claims_2020_01_04:initial_claims_2020_04_18, names_to = "initial_type", values_to = "initial_num") %>%
+  pivot_longer(cols = 
+                 initial_claims_2020_01_04:initial_claims_2020_04_18, 
+               names_to = "initial_type", values_to = "initial_num") %>%
   left_join(date_var)
 
 continued_long <- claims_data %>%
-  pivot_longer(cols = continued_claims_2020_01_04:continued_claims_2020_04_18, names_to = "continued_type", values_to = "continued_num") %>%
+  pivot_longer(cols = 
+                 continued_claims_2020_01_04:continued_claims_2020_04_18,
+               names_to = "continued_type", values_to = "continued_num") %>%
   left_join(date_var) %>%
   select(state, date, continued_type, continued_num)
 
-claims_long <- left_join(initial_long, continued_long, by = c("state","date"))
+claims_long <-
+  left_join(initial_long, continued_long, by = c("state","date"))
 anti_join(initial_long, continued_long)
 
 # select variables
 claims_long <- claims_long %>%
-  select(initial_type, initial_num, continued_type.x, continued_num, date, sah_date,
-         days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, 
-         Mortality_Rate, region, topind_gdp, topindemp_1, topindemp_2, topindemp_3, 
-         totpop_2018, pctpop_work, pctpop_hs, gov_republican, state) %>%
+  select(initial_type, initial_num, continued_type.x, continued_num, 
+         date, sah_date, days_since_peak_deaths, sum_conf, sum_deaths, 
+         Incident_Rate, Mortality_Rate, region, topind_gdp, topindemp_1, 
+         topindemp_2, topindemp_3, totpop_2018, pctpop_work, pctpop_hs, 
+         personal_inc2019, gov_republican, state) %>%
   mutate(days_since_sah = as.Date(date) - ymd(sah_date)) %>%
   mutate(days_since_sah = replace_na(days_since_sah, 0)) %>%
-  mutate(days_since_peak = days_since_peak_deaths - (as.Date("2020-05-01") - as.Date(date))) %>%
+  mutate(days_since_peak =
+           days_since_peak_deaths - (as.Date("2020-05-01") - as.Date(date))) %>%
   mutate(gov_republican = factor(gov_republican)) %>%
   select(-sah_date, -days_since_peak_deaths)
 ```
@@ -64,11 +71,12 @@ claims_testing <- claims_long %>%
   filter(date >= ymd("2020-04-18"))
 
 # create recipe for rf
-recipe_claims <- recipe(formula = initial_num ~ continued_num +
+recipe_claims <- recipe(formula = initial_num ~ continued_num + 
                           days_since_sah + days_since_peak + sum_conf + 
-                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
-                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
-                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
+                          sum_deaths + Incident_Rate + Mortality_Rate + 
+                          region + topind_gdp + topindemp_1 + topindemp_2
+                        + topindemp_3 + totpop_2018 + pctpop_work + 
+                          pctpop_hs + personal_inc2019 + gov_republican,
                         data = claims_training) %>%
   step_string2factor(region, topind_gdp, topindemp_1, topindemp_2, topindemp_3) %>%
   prep()
@@ -92,22 +100,22 @@ train_claims <- function(model, split, try, tree) {
                                 trees = tree) %>%
       set_engine("ranger",
                  importance = "impurity") %>%
-      fit(formula = initial_num ~ continued_num +
-                          days_since_sah + days_since_peak + sum_conf + 
-                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
-                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
-                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
+      fit(formula = initial_num ~ continued_num + days_since_sah + 
+            days_since_peak + sum_conf + sum_deaths + Incident_Rate + 
+            Mortality_Rate + region + topind_gdp + topindemp_1 + 
+            topindemp_2 + topindemp_3 + totpop_2018 + pctpop_work + 
+            pctpop_hs + personal_inc2019 + gov_republican,
           data = bake(object = recipe_claims,
                       new_data = claims_analysis))
   }
   else if(model == "cart") {
     model_claims <- decision_tree(mode = "regression") %>%
       set_engine("rpart") %>%
-      fit(formula = initial_num ~ continued_num +
-                          days_since_sah + days_since_peak + sum_conf + 
-                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
-                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
-                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
+      fit(formula = initial_num ~ continued_num + days_since_sah + 
+            days_since_peak + sum_conf + sum_deaths + Incident_Rate + 
+            Mortality_Rate + region + topind_gdp + topindemp_1 + 
+            topindemp_2 + topindemp_3 + totpop_2018 + pctpop_work + 
+            pctpop_hs + personal_inc2019 + gov_republican,
           data = bake(object = recipe_claims,
                       new_data = claims_analysis))
   }
@@ -127,36 +135,35 @@ train_claims <- function(model, split, try, tree) {
 }
 ```
 
-```{r pick-model-and-train-on-training-data, echo=T, message=F, warning=F}
+```{r pick-model, echo=T, message=F, warning=F}
 
-# calculate RMSEs for : apply custom function to resamples
-
+# apply custom function to resamples
 claims_resamples <- claims_resamples %>%
   mutate(
-    rmse_1 = map_dbl(.x = splits,
-                     .f = ~train_claims(model = "rf",
-                                        split = .x,
-                                        try = 5,
-                                        tree = 50))
+    rmse_rf_1 = map_dbl(.x = splits,
+                        .f = ~train_claims(model = "rf",
+                                           split = .x,
+                                           try = 5,
+                                           tree = 50))
   ) %>%
   mutate(
-    rmse_2 = map_dbl(.x = splits,
-                     .f = ~train_claims(model = "rf",
-                                        split = .x,
-                                        try = 10,
-                                        tree = 100))
+    rmse_rf_2 = map_dbl(.x = splits,
+                        .f = ~train_claims(model = "rf",
+                                           split = .x,
+                                           try = 10,
+                                           tree = 100))
   ) %>%
   mutate(
-    rmse_3 = map_dbl(.x = splits,
-                     .f = ~train_claims(model = "rf",
-                                        split = .x,
-                                        try = 14,
-                                        tree = 500))
+    rmse_rf_3 = map_dbl(.x = splits,
+                        .f = ~train_claims(model = "rf",
+                                           split = .x,
+                                           try = 14,
+                                           tree = 500))
   ) %>%
   mutate(
-    rmse_4 = map_dbl(.x = splits,
-                     .f = ~train_claims(model = "cart",
-                                        split = .x))
+    rmse_cart = map_dbl(.x = splits,
+                        .f = ~train_claims(model = "cart",
+                                           split = .x))
   )
 
 glimpse(claims_resamples)
@@ -166,15 +173,15 @@ claims_resamples <- claims_resamples %>%
   select(-splits)
 
 knitr::kable(claims_resamples)
-knitr::kable(rmse_avg <- c(mean(claims_resamples$rmse_1),
-                           mean(claims_resamples$rmse_2),
-                           mean(claims_resamples$rmse_3),
-                           mean(claims_resamples$rmse_4)),
+knitr::kable(rmse_avg <- c(mean(claims_resamples$rmse_rf_1),
+                           mean(claims_resamples$rmse_rf_2),
+                           mean(claims_resamples$rmse_rf_3),
+                           mean(claims_resamples$rmse_cart)),
              col.names = "RMSE"
 )
 ```
 
-```{r visualize-RMSE-for-resamples, echo=T, message=F, warning=F}
+```{r visualize-RMSEs-for-resamples, echo=T, message=F, warning=F}
 
 claims_resamples %>%
   pivot_longer(-id) %>%
@@ -202,7 +209,8 @@ model_final <-
         days_since_sah + days_since_peak + sum_conf + 
         sum_deaths + Incident_Rate + Mortality_Rate + region + 
         topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
-        totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
+        totpop_2018 + pctpop_work + pctpop_hs + personal_inc2019 +
+        gov_republican,
       data = bake(object = recipe_claims,
                   new_data = claims_training))
 
