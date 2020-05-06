@@ -22,7 +22,7 @@ library(ranger)
 ```{r split-and-preprocess-data-for-rf, echo=T, message=F, warning=F}
 
 # read in data
-claims_data <- read_csv("~/Downloads/DataScienceAssignments/groupproject/data/clean/merged.csv")
+claims_data <- read_csv("data/clean/merged.csv")
 
 # make dataset
 claims_data <- claims_data %>%
@@ -143,4 +143,48 @@ knitr::kable(rmse_avg <- c(mean(claims_resamples$rmse_1),
                            mean(claims_resamples$rmse_4)),
              col.names = "RMSE"
 )
+```
+
+
+```{r visualize RMSE for different resamples}
+
+claims_resamples %>%
+  pivot_longer(-id) %>%
+  ggplot(aes(x = id,
+             y = value,
+             color = name,
+             group = name)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, NA)) +
+  theme_minimal()
+
+```
+
+```{r calculating means across 10 resamples}
+
+claims_resamples %>%
+  summarize(mean(rmse_1),
+            mean(rmse_2),
+            mean(rmse_3),
+            mean(rmse_4))
+```
+
+Estimating out of sample error rate
+
+```{r fitting model to testing data}
+
+model_final <-
+  rand_forest(mode = "regression") %>%
+  set_engine("ranger",
+             importance = "impurity") %>%
+  fit(initial_claims_2020_04_11 ~.,
+      data = claims_training)
+
+bind_cols(
+  claims_testing,
+  predict(model_final, claims_testing)
+) %>%
+  metrics(truth = initial_claims_2020_04_11, 
+          estimate = .pred)
 ```
