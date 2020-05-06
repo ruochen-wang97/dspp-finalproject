@@ -48,9 +48,9 @@ claims_long <- claims_long %>%
          days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, 
          Mortality_Rate, region, topind_gdp, topindemp_1, topindemp_2, topindemp_3, 
          totpop_2018, pctpop_work, pctpop_hs, gov_republican, state) %>%
-  mutate(days_since_sah = ifelse(date < as.Date("2020-04-18"), as.Date("2020-04-11") - ymd(sah_date), as.Date("2020-04-18") - ymd(sah_date))) %>%
+  mutate(days_since_sah = as.Date(date) - ymd(sah_date)) %>%
   mutate(days_since_sah = replace_na(days_since_sah, 0)) %>%
-  mutate(days_since_peak = ifelse(date < as.Date("2020-04-18"), days_since_peak_deaths - 21, days_since_peak_deaths - 14)) %>%
+  mutate(days_since_peak = days_since_peak_deaths - (as.Date("2020-05-01") - as.Date(date))) %>%
   mutate(gov_republican = factor(gov_republican)) %>%
   select(-sah_date, -days_since_peak_deaths)
 ```
