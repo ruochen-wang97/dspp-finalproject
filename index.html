@@ -365,18 +365,6 @@ summary {
 </div>
 
 
-<div id="table-of-contents" class="section level3">
-<h3>Table of Contents</h3>
-<p>(<a href="https://ruochen-wang97.github.io/dspp-finalproject/name_of_md_rmd_file_in_master" class="uri">https://ruochen-wang97.github.io/dspp-finalproject/name_of_md_rmd_file_in_master</a>)</p>
-<ul>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/Introduction">Introduction</a></li>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/Data_Description">Data Description</a></li>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/EDA">Exploratory Data Analysis</a></li>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/Modelling">Modelling Process</a> 1) <a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stsah">Model 1</a> 1) <a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stcase">Model 2</a> 1) <a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stdeath">Model 3</a></li>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/disc_limi">Discussions and Limitations</a></li>
-<li><a href="https://ruochen-wang97.github.io/dspp-finalproject/Conclusion">Conclusion</a></li>
-</ul>
-</div>
 <div id="predicting-the-number-of-new-unemployment-insurance-claims-filed-for-the-week-ending-april-18" class="section level1">
 <h1><strong>Predicting the Number of New Unemployment Insurance Claims Filed for the Week Ending April 18</strong></h1>
 <p><em>By Radhika Kaul, Odiche Nwabuikwu, &amp; Ruochen Wang</em></p>
@@ -419,6 +407,7 @@ summary {
 <li><strong>personal_inc2019</strong>: per capita personal income in 2019</li>
 <li><strong>gov_republican</strong>: dummy set equal to 1 if governor republican</li>
 </ul>
+<p>See <a href="https://ruochen-wang97.github.io/dspp-finalproject/data-cleaning.html">here</a> for complete data cleaning process and descriptive analysis.</p>
 </div>
 </div>
 <div id="modeling" class="section level2">
@@ -428,19 +417,19 @@ summary {
 <li><p><strong>Training and Testing Sets</strong>: After researching existing time-series models, we decided to assign the data from the week ending April 18 to the testing set and all the other data from previous week to the training set. This allows us to predict the outcome for the week ending April 18 based on data from previous weeks.</p></li>
 <li><p><strong>Resampling</strong>: bootstrap</p></li>
 <li><p><strong>Outcome Variable</strong>: <em>initial_num</em></p></li>
-<li><p><strong>Candidate Model 1</strong>: Random Forest</p>
+<li><p><strong><a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stcase.html">Candidate Model 1</a></strong>: Random Forest</p>
 <ul>
 <li><strong>Data From:</strong> Week ending Janurary 25, when first COVID case was reported in the US</li>
 <li><strong># of Features at Each Split:</strong> 5</li>
 <li><strong># of Trees:</strong> 500</li>
 </ul></li>
-<li><p><strong>Candidate Model 2</strong>: Random Forest</p>
+<li><p><strong><a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stdeath.html">Candidate Model 2</a></strong>: Random Forest</p>
 <ul>
 <li><strong>Data From:</strong> Week ending March 7, when the first COVID-related death was discovered in the US (see <a href="https://www.npr.org/sections/coronavirus-live-updates/2020/04/22/840836618/1st-known-u-s-covid-19-death-was-on-feb-6-a-post-mortem-test-reveals">here</a>)</li>
 <li><strong># of Features at Each Split:</strong> 5</li>
 <li><strong># of Trees:</strong> 100</li>
 </ul></li>
-<li><p><strong>Candidate Model 3</strong>: Random Forest</p>
+<li><p><strong><a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stsah.html">Candidate Model 3</a></strong>: Random Forest</p>
 <ul>
 <li><strong>Data From:</strong> Week ending March 21, when the first stay-at-home order was issued in California</li>
 <li><strong># of Features at Each Split:</strong> 5</li>
