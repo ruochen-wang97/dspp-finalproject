@@ -1,53 +1,9 @@
 ---
-title: "Predicting the Number of Unemployment Insurance Claims in the Time of COVID-19"
-author: "submitted by Radhika Kaul, Odiche Nwabuikwu, & Ruochen Wang"
-output:
-  html_document:
-    df_print: paged
-urlcolor: blue
+title: "Data Cleaning and Descriptive Analysis"
+output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-
-## Question of Interest
-
-We will develop different models to predict the number of unemployment claims filed in each US state in the second week of May (when the project is due). Our primary data source for the outcome variable is the [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp) from the U.S. Department of Labor (DOL)'s Employment & Training Administration.
-
-## Project Progress
-
-We have decided on the following variables for our models:
-
-**Outcome Variables**: either New Initial Claims filed per week OR percentage of the labor force filing for unemployment claims per week. New Initial Claims is one of the most sensitive and most frequently used official statistics in analyzing unemployment trends (see [Aaron Soujourner and Paul Goldsmith Pinkham](https://paulgp.github.io/GoogleTrendsUINowcast/google_trends_UI.html)).
-
-**Predictors** *(all variables are at the state level)*
-
-Structural predictors include:
-
-- Region
-- Population
-- Working Population
-- Per Capita Personal Income
-- Percent Population w/ a High School Degree
-- Top Industry in terms of GDP Contribution
-- Democratic or Republican Governor
-
-We are considering standardizing/normalizing/logging the population variables due to concerns of high correlations between these variables and the outcome variable.
-
-Real-Time Predictors include:
-
-- Number of COVID Cases
-- Number of Days Since the Issurance of Stay-at-Home Order
-- Number of Days Before Stay-at-Home Order Ends
-- Peak of Claims Predicted *(we haven't found a data source yet but will keep looking)*
-- Whether there has been a protest/protests in the state
-
-**Predictive Models**: We will have three predictive models based off of data from when the first case was reported in the US, the first death was reported in the US, and the modified date when the first death related to COVID-19 was reported (see https://www.cnn.com/2020/04/22/us/california-deaths-earliest-in-us/index.html)
-
-**Algorithms**: KNN/CART/Random Forest. We will test each algorithm and get the error rates and pick the best one.
-
-We propose a **Random Forest** model given that we have both categorical and continuous inputs and that we have correlated predictors. Also given the fluctuation in the weekly claims data, Random Forest will make more accurate out-of-sample predictions as compared to KNN and CART.
-
-**Error Metrics**: RMSE (OOB Error for Random Forest)
 
 ## Data Cleaning
 
@@ -69,7 +25,7 @@ library(ggridges)
 
 ### Unemployment Claims
 
-```{r unemp-clean}
+```{r unemp-clean, echo=T, message=F, warning=F}
 
 claims <- read_excel("data/raw/unemployment_bystate_weekly.xls")
 
@@ -90,7 +46,7 @@ claims <-
 
 ### GDP by Industry
 
-```{r gdp-clean}
+```{r gdp-clean, echo=T, message=F, warning=F}
 
 gdp <-
   read.csv("data/raw/gdp_bystate_byindustry_2019.csv")
@@ -118,7 +74,7 @@ gdp <- gdp %>%
 
 ### Per Capita Personal Income
 
-```{r inc-clean}
+```{r inc-clean, echo=T, message=F, warning=F}
 
 income <- read_csv("data/raw/percapitapersonalincome_bystate_2019.csv")
 
@@ -130,7 +86,7 @@ income <- income %>%
 
 ### Employment by Occupation
 
-```{r occ-clean}
+```{r occ-clean, echo=T, message=F, warning=F}
 
 occ <- read_excel("data/raw/employment_byoccupation_bystate_may2019.xlsx")
 
@@ -151,11 +107,9 @@ occ <- occ %>%
   rename(topindemp_3 = 2, topindemp_1 = 3, topindemp_2 = 4)
 ```
 
-ATT: need further discussion since not much variance
-
 ### Census Region
 
-```{r regions-clean}
+```{r regions-clean, echo=T, message=F, warning=F}
 
 regions <- read_excel("data/raw/censusregion_bystate.xlsx")
 
@@ -166,7 +120,7 @@ regions <- regions %>%
 
 ### Merge Datasets
 
-```{r merge}
+```{r merge, echo=T, message=F, warning=F}
 clean_data <-
   left_join(claims, income, by = "state")
 anti_join(clean_data, income)
@@ -184,7 +138,7 @@ clean_data <-
 anti_join(clean_data, regions)
 ```
 
-```{r merge-sah-date}
+```{r merge-sah-date, echo=T, message=F, warning=F}
 
 # load & add stay at home date data
 sah <- read_excel("data/raw/stayathome.xlsx")
@@ -194,7 +148,7 @@ clean_data <-
 anti_join(clean_data, sah)
 ```
 
-```{r merge-peak-date}
+```{r merge-peak-date, echo=T, message=F, warning=F}
 
 #load & add peak death data
 
@@ -207,7 +161,7 @@ clean_data <-
 anti_join(clean_data, sah_peakdeaths)
 ```
 
-```{r merge-ed-attainment}
+```{r merge-ed-attainment, echo=T, message=F, warning=F}
 
 # load & add ed attainment data
 edattain <- read_csv("data/raw/edattain_bystate_2018.csv")
@@ -217,7 +171,7 @@ clean_data <-
 anti_join(clean_data, edattain)
 ```
 
-```{r merge-working-pop}
+```{r merge-working-pop, echo=T, message=F, warning=F}
 
 # load & add working pop data
 pctworkpop <- read_csv("data/raw/popest_bystate_2018.csv") %>%
@@ -228,7 +182,7 @@ clean_data <-
 anti_join(clean_data, pctworkpop)
 ```
 
-```{r merge-gov-party,  echo=T, message=F, warning=F}
+```{r merge-gov-party, echo=T, message=F, warning=F}
 
 # load & add governor party data
 party <- read_excel("data/raw/party_bystate_2020.xlsx")
@@ -238,7 +192,7 @@ clean_data <-
 anti_join(clean_data, party)
 ```
 
-```{r merge-death-num-till-apr10}
+```{r merge-death-num-till-apr18, echo=T, message=F, warning=F}
 
 # load packages
 library(httr)
@@ -267,7 +221,7 @@ clean_data <-
 anti_join(clean_data, jhu_data_final)
 ```
 
-```{r merge-incidence-and-mortality-rate-apr12}
+```{r merge-incidence-and-mortality-rate-apr18, echo=T, message=F, warning=F}
 
 # read in JHU data on incident and mortality rates from Github for April 18, 2020
 jhufile_2 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-18-2020.csv"
@@ -287,19 +241,20 @@ anti_join(clean_data, jhu_data_1)
 
 ### Create Final Analytical Data
 
-```{r final-merge}
+```{r final-merge, echo=T, message=F, warning=F}
 
 # remove white space from variable names
 names(clean_data) <- str_replace(names(clean_data), "-", "_") 
 names(clean_data) <- str_replace(names(clean_data), "-", "_") 
-
 
 clean_data %>% write_csv("data/clean/merged.csv")
 ```
 
 ## Descriptive Analysis
 
-```{r make-line-graph}
+The line graph below shows the trend in new unemployment insurance claims filed in the top five US states with the highest COVID-19 incidence rates (New York, New Jersey, Massachusetts, Louisiana, Connecticut; in descending order). The number of claims was relatively low until early March when most states issued stay-at-home orders and gathering restrictions (verticle line depicts March 19 when California issued the first stay-at-home order in the US). Because of the subsequent layoffs and furloughs, a huge spike was seen in the filing of new unemployment claims. We believe the number of days since the issurance of stay-at-home order will be a good predictor for the filing of new unemployment claims due to their strong correlation showcased here.
+
+```{r make-line-graph, echo=T, message=F, warning=F}
 
 # build line graph data
 line_data <- clean_data %>%
@@ -323,7 +278,7 @@ state_rank <- c("New York",
                 "Massachusetts",
                 "Louisiana",
                 "Connecticut")
-line_data$state <- factor(line_data$state, state_rank)
+line_data_date$state <- factor(line_data_date$state, state_rank)
 
 ggplot(data = line_data_date,
        mapping = aes(x = week_ended,
@@ -335,7 +290,7 @@ ggplot(data = line_data_date,
   geom_vline(xintercept = as.Date("2020-03-19"), linetype = 2) +
   scale_y_continuous(labels = c("0", "100,000", "200,000", "300,000", "400,000")) +
   theme_classic() +
-  labs(title = "Weekly Unemployment Insurance Claims in Top 5 States\nwith Highest COVID-19 Incidence Rate",
+  labs(title = "Number of New Unemployment Insurance Claims Filed in Top 5 States\nwith Highest COVID-19 Incidence Rate",
        caption = "Source: US Department of Labor & Johns Hopkins University",
        x = "Week Ending",
        y = "Number of Initial Claims") +
@@ -349,18 +304,16 @@ ggplot(data = line_data_date,
         axis.ticks.x = element_blank())
 ```
 
-The graph above depicts the weekly initial unemployment claims in top five US states with the highest COVID-19 incidence rates (Connecticut, Louisiana, Massachusetts, New Jersey, and New York). The claims appear relatively low (< 50,000) until early March many states issued stay at home orders and gathering restrictions to combat the spread of COVID-19. Since many people were unable to work remotely, they were forced to file for unemployment insurance leading to a sharp increase in the number of initial unemployment claims. Due to the strong effect of these quarantine measures, we believe stay at home orders will be a good predictor for unemployment claims.
+The tree map below captures the relationship between the cumulative number of unemployment claims filed in each state and the total number of COVID-19 cases in each state as of April 18th. The area each state covers encodes the number of claims in that state, and the color value encodes the COVID-19 incidence rate. This visualization allows us to see the relationship between the geographic distribution of COVID-19 cases and the number of unemployment claims filed (e.g., hot spots like New York and New Jersey also have relatively large number of filed claims). We thus believe region and COVID-19 incident rate are also important predictors in our model.
 
-
-```{r make-treemap}
+```{r make-treemap, echo=T, message=F, warning=F}
 
 # build treemap data
 treemap_data <- clean_data %>%
   select(state, region, `initial_claims_2020_04_18`, `continued_claims_2020_04_18`, Incident_Rate, totpop_work) %>%
   mutate(`totclaims_2020_04_18` = `continued_claims_2020_04_18` + `initial_claims_2020_04_18`) %>%
   mutate(perc_totclaims = (`totclaims_2020_04_18`/totpop_work) * 100) %>%
-  select(state, region, `totclaims_2020_04_18`, Incident_Rate, perc_totclaims) %>%
-  write_csv("treemap.csv")
+  select(state, region, `totclaims_2020_04_18`, Incident_Rate, perc_totclaims)
 
 # make treemap
 ggplot(data = treemap_data,
@@ -391,9 +344,10 @@ ggplot(data = treemap_data,
         legend.text = element_text(family = "Arial"))
 ```
 
-The tree map above captures the total number of US uninsurance claims filed as of April 18th and the number of COVID-19 cases. States are grouped by region and the area each state covers is proportional to the number of claims filed. The color of each area corresponds to the number of COVID-19 cases; states with higher COVID-19 cases have darker colored areas. This visualization allows us to see regional patterns in the spread of COVID-19 as well as the number of unemployment claims filed. <add one more line>.
+The scatterplot below unveils the relationship between COVID-19 incident rate and proportion of labor force filing for unemployment in each state. The dots on the scatterplot represent states, which are also colored by the party of the state governor. The graph shows a moderately positive correlation between COVID-19 incidence rate and proportion of labor force filing for unemployment - this makes sense since the spread of COVID-19 forces employers to shut down and laying off workers, leaving many unemployed. The relationship also appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model as it shows us the interaction between these three variables.
 
-```{r scatter-plot}
+```{r make-scatter-plot, echo=T, message=F, warning=F}
+
 clean_data %>%
   mutate(perc_claim = (`continued_claims_2020_04_18`/totpop_2018) * 100) %>%
   ggplot() +
@@ -401,29 +355,27 @@ clean_data %>%
                            color = as.character(gov_republican)),
              alpha = 0.5) + 
   scale_color_manual(name = "Party of State Governor",
-                       labels = c("Democrat", "Republican"), 
+                     labels = c("Democrat", "Republican"), 
                      values = c("blue", "red")) +
   labs(title = 
          paste("COVID-19 Incidence and Continued Claims by State Party"),
        caption = "Source: US Department of Labor & Johns Hopkins University",
-       x = "Percent of work force that filed claims",
-       y = "Incidence Rate") + 
+       x = "Incidence Rate",
+       y = "Percent of work force that filed claims") + 
   theme_minimal() +
-  theme(panel.grid.major = element_line(linetype = "dotted")) +
+  theme(panel.grid.major = element_line(linetype = "dotted", color = "gray")) +
   theme(panel.grid.minor = element_blank()) +
-   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
         plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 2),
         plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -2),
         legend.title = element_text(size = 9, family = "Arial", vjust = 4),
         legend.text = element_text(family = "Arial")) 
-
-
 ```
+ 
+The ridgeplot below shows the distribution of the number of days since the peak COVID-19 deaths as of April 18, broken down by region. Although this graph only shows braod patterns, it is useful for understanding which regions will be combating COVID-19 and (possibly) see increased unemployment claims for a longer period.
 
-The scatterplot above shows the relationship between continued unemployment claims filed and the COVI-19 incidence rate among US states. The points on the scatterplot are also colored by the party of the state governor. The graph shows a moderately positive relationship between COVID-19 incidence rates and continued claims as a percentage of the working population. This makes sense as the spread of COVID-19 has forced employers to shut down, leaving many unemployed. The relationship appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model becasue it shows that COVID-19 incidence rates are associated (to some degree) with the number of unisurance claims, which makes it a good predictor. 
+```{r make-ridge-plot, echo=T, message=F, warning=F}
 
-
-```{r density-plot}
 # create variable for peak since April 18th
 
 clean_data <- clean_data %>%
@@ -436,7 +388,7 @@ ggplot(data = clean_data, mapping = aes(x = peak, y = as.factor(region))) +
   labs(title = 
          paste("Distribution of Days Since Predicted COVID-19 \nPeak Deaths by Region"),
        caption = "Source: Institute for Health Metrics and Evaluation",
-       x = "Days since peak deaths (as of April 18th)",
+       x = "Days since peak deaths (as of April 18)",
        y = "Region") +
   theme_minimal() +
    theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
@@ -444,10 +396,4 @@ ggplot(data = clean_data, mapping = aes(x = peak, y = as.factor(region))) +
         plot.caption = element_text(size = 7, family = "Arial", face = "italic", vjust = -2),
         legend.title = element_text(size = 9, family = "Arial", vjust = 4),
         legend.text = element_text(family = "Arial")) 
-  
 ```
-
-The ridgeplot above shows the distribution of the days since peak COVID-19 deaths broken down by region. Days since peak deaths is a predicted variable generated by the IHME. Although this visualization only shows braod patterns, it is useful for understanding which regions will combat COVID-19 for a longer period. This is informative because we can expect these regions to maintain quarantine measures for longer, which may result in increased unemployment claims in the coming weeks. Thus this variable would be a useful predictor for our model. 
-
-
-
