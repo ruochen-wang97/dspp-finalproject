@@ -391,7 +391,7 @@ ggplot(data = treemap_data,
         legend.text = element_text(family = "Arial"))
 ```
 
-The tree map above captures the total number of US uninsurance claims filed as of April 18th and the number of COVID-19 cases. States are grouped by region and the area each state covers is proportional to the number of claims filed. The color of each area corresponds to the number of COVID-19 cases; states with higher COVID-19 cases have darker colored areas. This visualization allows us to see regional patterns in the spread of COVID-19 as well as the number of unemployment claims filed. <add one more line>.
+The tree map above captures the total number of US uninsurance claims filed as of April 18th and the number of COVID-19 cases. States are grouped by region and the area each state covers is proportional to the number of claims filed. The color of each area corresponds to the number of COVID-19 cases; states with higher COVID-19 cases have darker colored areas. This visualization allows us to see regional patterns in the spread of COVID-19 as well as the number of unemployment claims filed. Most affected population have been the self-employed and gig workers, as well as workers in hospitality industry such as restaurants, who were made eligible for unemployement benefits when they experienced job losses.
 
 ```{r scatter-plot}
 clean_data %>%
@@ -420,7 +420,7 @@ clean_data %>%
 
 ```
 
-The scatterplot above shows the relationship between continued unemployment claims filed and the COVI-19 incidence rate among US states. The points on the scatterplot are also colored by the party of the state governor. The graph shows a moderately positive relationship between COVID-19 incidence rates and continued claims as a percentage of the working population. This makes sense as the spread of COVID-19 has forced employers to shut down, leaving many unemployed. The relationship appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model becasue it shows that COVID-19 incidence rates are associated (to some degree) with the number of unisurance claims, which makes it a good predictor. 
+The scatterplot above shows the relationship between continued unemployment claims filed and the COVID-19 incidence rate among US states. The points on the scatterplot are also colored by the party of the state governor. The graph shows a moderately positive relationship between COVID-19 incidence rates and continued claims as a percentage of the working population. This makes sense as the spread of COVID-19 has forced employers to shut down, leaving many unemployed. The relationship appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model becasue it shows that COVID-19 incidence rates are associated (to some degree) with the number of unisurance claims, which makes it a good predictor. 
 
 
 ```{r density-plot}
