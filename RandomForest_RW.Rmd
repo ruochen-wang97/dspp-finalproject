@@ -29,10 +29,20 @@ claims_data <- read_csv("data/clean/merged.csv")
 
 # make dataset
 claims_data <- claims_data %>%
-  select(initial_claims_2020_03_21, initial_claims_2020_03_28, initial_claims_2020_04_04, initial_claims_2020_04_11, continued_claims_2020_03_21, continued_claims_2020_03_28, continued_claims_2020_04_04, continued_claims_2020_04_11, sah_date, days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, Mortality_Rate, region, topind_gdp, topindemp_1, topindemp_2, topindemp_3, totpop_2018, pctpop_work, pctpop_hs, gov_republican) %>%
-  mutate(days_since_sah = as.Date("2020-04-11") - ymd(sah_date)) %>%
-  mutate(days_since_sah = replace_na(days_since_sah, 0)) %>%
-  mutate(days_since_peak = days_since_peak_deaths - 21) %>%
+  select(initial_claims_2020_03_21, initial_claims_2020_03_28, 
+         initial_claims_2020_04_04, initial_claims_2020_04_11, 
+         initial_claims_2020_04_18, continued_claims_2020_03_21, 
+         continued_claims_2020_03_28, continued_claims_2020_04_04, 
+         continued_claims_2020_04_11, continued_claims_2020_04_18,
+         sah_date, days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, 
+         Mortality_Rate, region, topind_gdp, topindemp_1, topindemp_2, topindemp_3, 
+         totpop_2018, pctpop_work, pctpop_hs, gov_republican, state) %>%
+  mutate(days_since_sah_0411 = as.Date("2020-04-11") - ymd(sah_date)) %>%
+  mutate(days_since_sah_0411 = replace_na(days_since_sah_0411, 0)) %>%
+  mutate(days_since_peak_0411 = days_since_peak_deaths - 21) %>%
+  mutate(days_since_sah_0418 = as.Date("2020-04-18") - ymd(sah_date)) %>%
+  mutate(days_since_sah_0418 = replace_na(days_since_sah_0418, 0)) %>%
+  mutate(days_since_peak_0418 = days_since_peak_deaths - 14) %>%
   mutate(gov_republican = factor(gov_republican)) %>%
   select(-sah_date)
 
@@ -45,10 +55,16 @@ claims_testing <- testing(claims_split)
 # and the testing set is now under lock and key!!!
 
 # create recipe for rf
-recipe_claims <- recipe(formula = initial_claims_2020_04_11 ~.,
+recipe_claims <- recipe(formula = initial_claims_2020_04_11 ~ 
+                          initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 +
+                          days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
                         data = claims_training) %>%
   step_string2factor(region, topind_gdp, topindemp_1, topindemp_2, topindemp_3) %>%
-  step_dummy(gov_republican) %>%
   prep()
 
 # create 10-fold
@@ -58,12 +74,12 @@ claims_resamples <- vfold_cv(data = claims_training, v = 10)
 ```{r create-custom-function-for-resamples, echo=T, message=F, warning=F}
 
 # create custom function
-train_claims <- function(model, split, formula, try, tree, k) {
+train_claims <- function(model, split, formula, try, tree) {
   
   # create analysis data from split
   claims_analysis <- analysis(split)
   
-  # set model
+  # set models - Random Forest and CART
   if(model == "rf") {
     model_claims <- rand_forest(mode = "regression",
                                 mtry = try,
@@ -85,7 +101,7 @@ train_claims <- function(model, split, formula, try, tree, k) {
   # create assessment data from split
   claims_assessment <- assessment(split)
   
-  # get predictions on assessment data and colculate out-of-sample rmse for split
+  # get predictions on assessment data and rmse for each split
   rmse <- bind_cols(
     claims_assessment,
     predict(model_claims, bake(object = recipe_claims,
@@ -105,7 +121,16 @@ claims_resamples <- claims_resamples %>%
   mutate(
     rmse_1 = map_dbl(.x = splits,
                      .f = ~train_claims(model = "rf",
-                                        formula = initial_claims_2020_04_11 ~ .,
+                                        formula = initial_claims_2020_04_11 ~
+                                          initial_claims_2020_03_21 +
+                                          initial_claims_2020_03_28 +
+                                          initial_claims_2020_04_04 +
+                                          continued_claims_2020_03_21 + 
+                                          continued_claims_2020_03_28 +
+                                          continued_claims_2020_04_04 + days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
                                         split = .x,
                                         try = 5,
                                         tree = 50))
@@ -113,7 +138,14 @@ claims_resamples <- claims_resamples %>%
   mutate(
     rmse_2 = map_dbl(.x = splits,
                      .f = ~train_claims(model = "rf",
-                                        formula = initial_claims_2020_04_11 ~ .,
+                                        formula = initial_claims_2020_04_11 ~ 
+                          initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 +
+                          days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
                                         split = .x,
                                         try = 10,
                                         tree = 100))
@@ -121,7 +153,14 @@ claims_resamples <- claims_resamples %>%
   mutate(
     rmse_3 = map_dbl(.x = splits,
                      .f = ~train_claims(model = "rf",
-                                        formula = initial_claims_2020_04_11 ~ .,
+                                        formula = initial_claims_2020_04_11 ~ 
+                          initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 +
+                          days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
                                         split = .x,
                                         try = 20,
                                         tree = 500))
@@ -129,10 +168,17 @@ claims_resamples <- claims_resamples %>%
   mutate(
     rmse_4 = map_dbl(.x = splits,
                      .f = ~train_claims(model = "cart",
-                                        formula = initial_claims_2020_04_11 ~ .,
+                                        formula = initial_claims_2020_04_11 ~ 
+                         initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 +
+                          days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
                                         split = .x))
   )
-    
+
 glimpse(claims_resamples)
 
 # compare rf and cart
@@ -148,8 +194,7 @@ knitr::kable(rmse_avg <- c(mean(claims_resamples$rmse_1),
 )
 ```
 
-
-```{r visualize RMSE for different resamples}
+```{r visualize-RMSE-for-resamples, echo=T, message=F, warning=F}
 
 claims_resamples %>%
   pivot_longer(-id) %>%
@@ -164,40 +209,75 @@ claims_resamples %>%
 
 ```
 
-```{r calculating means across 10 resamples}
+```{r est-out-of-sample-rate, echo=T, message=F, warning=F}
 
-claims_resamples %>%
-  summarize(mean(rmse_1),
-            mean(rmse_2),
-            mean(rmse_3),
-            mean(rmse_4))
-```
-
-Estimating out of sample error rate
-
-```{r fitting model to testing data}
-
-# Final prediction on testing data
+# prediction on testing data
 model_final <-
-  rand_forest(mode = "regression") %>%
-  set_engine("ranger",
-             importance = "impurity") %>%
-  fit(initial_claims_2020_04_11 ~.,
+  rand_forest(mode = "regression",
+              mtry = 5,
+              trees = 50) %>%
+      set_engine("ranger", importance = "impurity") %>%
+  fit(initial_claims_2020_04_11 ~
+        initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 +
+                          days_since_sah_0411 + days_since_peak_0411 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
       data = claims_training)
 
 
 # Adding predicted values column to testing data
 claims_testing <- bind_cols(
   claims_testing,
-  pred_claims_2020_04_18 = predict(model_final, claims_testing)
+  pred_claims_2020_04_11 = predict(model_final, claims_testing)
 ) 
-
 
 # Error metric estimation
 bind_cols(
   claims_testing,
-  pred_claims_2020_04_18 = predict(model_final, claims_testing)
+  pred_claims_2020_04_11 = predict(model_final, claims_testing)
 ) %>%
   metrics(truth = initial_claims_2020_04_11, 
+          estimate = .pred)
+```
+
+```{r predict-apr-18-claims, echo=T, message=F, warning=F}
+
+set.seed(20200506)
+
+claims_split_pred <- initial_split(claims_data, prop = .8)
+claims_training_pred <- training(claims_split)
+claims_testing_pred <- testing(claims_split)
+
+# Amen
+model_final_pred <-
+  rand_forest(mode = "regression",
+              mtry = 5,
+              trees = 50) %>%
+      set_engine("ranger", importance = "impurity") %>%
+  fit(initial_claims_2020_04_18 ~
+        initial_claims_2020_03_21 + initial_claims_2020_03_28 + 
+                          initial_claims_2020_04_04 + initial_claims_2020_04_11 + continued_claims_2020_03_21 + 
+                          continued_claims_2020_03_28 + continued_claims_2020_04_04 + continued_claims_2020_04_11 +
+                          days_since_sah_0418 + days_since_peak_0418 + sum_conf + 
+                          sum_deaths + Incident_Rate + Mortality_Rate + region + 
+                          topind_gdp + topindemp_1 + topindemp_2 + topindemp_3 + 
+                          totpop_2018 + pctpop_work + pctpop_hs + gov_republican,
+      data = claims_training_pred)
+
+# Adding predicted values column to testing data
+claims_testing <- bind_cols(
+  claims_testing,
+  pred_claims_2020_04_18 = predict(model_final_pred, claims_testing_pred)
+) 
+
+# Error metric estimation
+bind_cols(
+  claims_testing_pred,
+  pred_claims_2020_04_18 = predict(model_final_pred, claims_testing_pred)
+) %>%
+  metrics(truth = initial_claims_2020_04_18, 
           estimate = .pred)
 ```
