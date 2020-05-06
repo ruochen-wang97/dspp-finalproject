@@ -59,7 +59,7 @@ claims_long <- claims_long %>%
   mutate(days_since_peak =
            days_since_peak_deaths - (as.Date("2020-05-01") - as.Date(date))) %>%
   mutate(gov_republican = factor(gov_republican)) %>%
-  filter(as.Date(date) >= as.Date("2020-03-21")) %>% #filter to 1st sah
+  filter(as.Date(date) >= as.Date("2020-01-25")) %>% #filter to 1st case
   select(-sah_date, -days_since_peak_deaths)
 ```
 
