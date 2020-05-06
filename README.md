@@ -47,7 +47,7 @@ _Structural Variables_
 
 ## Modeling
 
-We constructed a Random Forest (RF) model to predict the number of new unemployment insurance claims filed for the week ending April 18 using the variables listed above. We also tested a CART model together with RF models with different hyperparameters within different subsets of data, and for each data subset RF models always perform better than the CART model.
+We constructed a Random Forest (RF) model to predict the number of new unemployment insurance claims filed for the week ending April 18 using the variables listed above. We used three subsets of data - data from when the first COVID cases was reported in the US, data from when the first COVID-related death was discovered in the US, and data from when the first stay-at-home order was issued in California - to determine the best model. We also tested a CART model together with RF models with different hyperparameters within different subsets of data, and for every data subset RF models always perform better than the CART model.
 
 * **Training and Testing Sets**: After researching existing time-series models, we decided to assign the data from the week ending April 18 to the testing set and all the other data from previous week to the training set. This allows us to predict the outcome for the week ending April 18 based on data from previous weeks.
 
@@ -55,19 +55,19 @@ We constructed a Random Forest (RF) model to predict the number of new unemploym
 
 * **Outcome Variable**: _initial_num_
 
-* **Model 1**: Random Forest
+* **Candidate Model 1**: Random Forest
 
   +  **Data From:** Week ending Janurary 25, when first COVID case was reported in the US
   +  **# of Features at Each Split:** 5
   +  **# of Trees:** 500
   
-* **Model 2**: Random Forest
+* **Candidate Model 2**: Random Forest
 
   +  **Data From:** Week ending March 7, when the first COVID-related death was discovered in the US (see [here](https://www.npr.org/sections/coronavirus-live-updates/2020/04/22/840836618/1st-known-u-s-covid-19-death-was-on-feb-6-a-post-mortem-test-reveals))
   +  **# of Features at Each Split:** 5
   +  **# of Trees:** 100
 
-* **Model 3**: Random Forest
+* **Candidate Model 3**: Random Forest
   
   +  **Data From:** Week ending March 21, when the first stay-at-home order was issued in California
   +  **# of Features at Each Split:** 5
@@ -75,7 +75,10 @@ We constructed a Random Forest (RF) model to predict the number of new unemploym
 
 * **Error Metric**: Root Mean Square Error (RMSE). We decided to use RMSE because the outcome we are predicting is a regression problem.
 
-We decided that Model 1 is the best model given that it has the lowest error rate.
+We decided that Candidte Model 1 is the best model given that it has the lowest error rate.
 
-## Discussion
+## Discussion and Limitations
 
+For this project, we constructed a Random Forest model in a supervised machine learning environment to predict the number of new unemployment insurance claims filed per keek in the time of COVID-19. We used real-time variables such as the number of insured unemployment up until the target week and the number of days since the state issued a stay-at-home order as proxies for the interaction between the labor market and the ongoing pandemic, and structural variables to account for characteristics unique to each state. We end up with a model with 500 trees and five features at each split, with an R-sqaured of .683.
+
+Our theory for the primary reason the first candidate model outperform the other two is that it is trained on a larger dataset. This means it can utilize more information when making predictions. Within each subset of data (data from week ending January 25, March 7, and March 21), RF models always outperform the CART model because they allow for different combinations of features in each iteration and hence capture more variation in the data. Potential limitations of our model include overfitting, as is showcased in the residual plot that the RMSE for the training data is **way** lower than that for the testing data, and inevitable bias due to the complexity in the factors affecting the labor market. Additionally, as with all Random Forest models, our model may not be very robust when changing the input data and the outcome it predicts for the following weeks might not be hyper consistent/reliable.
