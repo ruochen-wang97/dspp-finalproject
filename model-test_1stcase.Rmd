@@ -85,7 +85,7 @@ recipe_claims <- recipe(formula = initial_num ~ continued_num +
   prep()
 
 # create 10-fold
-claims_resamples <- vfold_cv(data = claims_training, v = 10)
+claims_resamples <- bootstraps(data = claims_training, times = 10)
 ```
 
 ```{r create-custom-function-for-resamples, echo=T, message=F, warning=F}

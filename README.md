@@ -10,7 +10,7 @@ Understanding these surges at the state level has important policy implications 
 
 ## Data
 
-The data we used in constructing the model span from the week ending March 21, when California became the first state to issue an stay-at-home order, to the week ending April 18, when the latest federal data are available.
+We tested different models and decided to use data spanning from the week ending March 7, when the first death in the US was reported by the Centers for Disease Control and Prevention (CDC), to the week ending April 18, when the latest federal data are available.
 
 The predicted and predictors variables in our dataset are from the following sources:
 
@@ -23,7 +23,7 @@ The predicted and predictors variables in our dataset are from the following sou
 
 _Real-time Variables_
 
-- **initial_num**: # of new claims filed for that week
+- **initial_num**: outcome car. # of new claims filed for that week. 
 - **continued_num**: # of insured unemployment for that week
 - **days_since_sah**: # days between the last day of week and the day when state issued stay-at-home order
 - **days_since_peak[^1]**: # of days between last day of week and  predicted death peak according to IHME
@@ -43,19 +43,17 @@ _Structural Variables_
 - **personal_inc2019**: per capita personal income in 2019
 - **gov_republican**: dummy set equal to 1 if governor republican
 
-_[^1]: Calculated based on projections made by IHME. Last updated on April 29 and is no longer being updated. See [here](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) for predicted peaks._
+[^1]: _Calculated based on projections made by IHME. Last updated on April 29 and is no longer being updated. See [here](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) for predicted peaks._
 
 ## Modeling
 
-We plan to conduct a model comparison for prediction of number of unemployment insurance claims filed in 4th week of April: Following are the models we shall apply on our training data:
+We constructed a Random Forest (RF) model to predict the number of new unemployment insurance claims filed for the week ending April 18 using the variables listed above.
 
-- **Training-Testing Split**: 80:20 Split of the training and testing data. Since this is a time-series machine learning model, we shall keep all the variables except the initial_claims_2020_04_18 in the training data and compare our predictions to the actual values in the testing data which will have the initial_claims_2020_04_18 variable. 
+- **Training and Testing Sets**: After researching existing time-series models, we decided to assign the data from the week ending April 18 to the testing set and all the other data from previous week to the training set. This allows us to predict the outcome for the week ending April 18 based on data from previous weeks.
 
-- **Resampling Method for training data**: k-fold cross validation. Reading of the mechanism suggests that for smaller sample size, 10-fold CV repeated 5 or 10 times will improve the accuracy of your estimated performance. Bootstrapping (random sample of the data taken with replacement) seems to work better than k-fold CV due to less variability in the error measure, however, may increase the bias on the error estimate. Since ours is a really small sample, there is a higher likelihood of us running into that disadvantage.
+- **Resampling**: bootstrap
 
 - **Target Variable**: The target variable in our training set will be  _initial-claims-2020-04-11_, that is the number of initial claims filed in the week of April 11.
-
-- **Predictors**: All the variables except FIPS, Lat, Long_
 
 - **Model 1**: K-Nearest Neighbor - In this model, when a new sample is predicted, _k_ training set points are found that bears the almost same resemblance to the new sample being predicted. This algorithm is simple and easy to implement and is highly locally interpretable. Higher values of _k_ may result in lower RMSEs but may also run into the risk of overfitting the model.
 
