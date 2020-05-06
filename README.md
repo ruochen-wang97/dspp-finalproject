@@ -16,38 +16,36 @@ The predicted and predictors variables in our dataset are from the following sou
 
 - [Unemployment Insurance Weekly Claims data](https://oui.doleta.gov/unemploy/claims.asp), administered by the U.S. Department of Labor (DOL)'s Employment & Training Administration
 - COVID-19 tracking data from the [COVID-19 Data Repository](https://github.com/CSSEGISandData/COVID-19), administered by CSSE at Johns Hopkins University
-- COVID-19 projection data from the [Institute for Health Metrics and Evaluation](http://www.healthdata.org/) at the University of Washington
+- COVID-19 projection data from the [Institute for Health Metrics and Evaluation (IHME)](http://www.healthdata.org/) at the University of Washington
 - State-level structural data from the [U.S. Census Bureau](https://www.census.gov)
 
 ### Codebook
 
 _Real-time Variables_
 
-- **initial_num**: Number of first time claims filed an individual after job loss (weekly estimates)
-- **continued_num**: Number of insured unemployed workers filing for UI benefits (wwekly estimates)
-- **days_since_sah**: 
-- **days_since_peak[^1]**: number of days between last day of week and  predicted death peak according to IHME
-- **reopen_date**: Stay at home order end dates
-- **sum_conf**: cummulative COVID-19 deaths by April 18, 2020
-- **sum_death**: cummulative COVID-19 confirmed cases deaths by April 18, 2020
-- **Incident_Rate**: Confirmed cases per 100,000 people
-- **Mortality_Rate**: Number recorded deaths * 100/ Number confirmed cases
+- **initial_num**: # of new claims filed for that week
+- **continued_num**: # of insured unemployment for that week
+- **days_since_sah**: # days between the last day of week and the day when state issued stay-at-home order
+- **days_since_peak[^1]**: # of days between last day of week and  predicted death peak according to IHME
+- **Incident_Rate**: # of confirmed COVID cases per 100,000 residents
+- **Mortality_Rate**: # of reported deaths * 100/ # confirmed cases
 
 _Structural Variables_
 
 - **region**: census region
-- **topind_gdp**: Top industry contributing to GDP
-- **topindemp_1**: 
-- **topindemp_2**: 
-- **topindemp_3**:
-- **totpop_2018**: Total population in 2018
-- **pctpop_work**: Percent working population
-- **pctpop_hs**: Percent population with a HS degree
-- **gov_republican**: Democratic or Republican governor
-- **personal_inc2019**: Personal income in 2019 (state-level)
+- **topind_gdp**: top industry in terms of % GDP contribution
+- **topindemp_1**: top 1 industry in terms of % employment
+- **topindemp_2**: top 2 industry in terms of % employment
+- **topindemp_3**: top 3 industry in terms of % employment
+- **totpop_2018**: total population in 2018
+- **pctpop_work**: % population age 15-64
+- **pctpop_hs**: % population with at least a high school degree
+- **personal_inc2019**: per capita personal income in 2019
+- **gov_republican**: dummy set equal to 1 if governor republican
 
+_[^1]: Calculated based on projections made by IHME. Last updated on April 29 and is no longer being updated. See [here](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) for predicted peaks.
 
-### The Modelling Process
+## Modeling
 
 We plan to conduct a model comparison for prediction of number of unemployment insurance claims filed in 4th week of April: Following are the models we shall apply on our training data:
 
@@ -72,13 +70,3 @@ We plan to conduct a model comparison for prediction of number of unemployment i
     3) Selection 3: when mtry = 50, ntree = 400
     
 - **Error Metric**: Root Mean Square Error - why are we using this.
-    
-
-
-[^1]: _This calculation is based on the projections made by the Institute for Health Metrics and Evaluation (when it was last updated on April 29th). IHME no longer reports projected peak date. This [report](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) gives us the exact dates the peaks were predicted by the IHME model. And since we are assuming we are in the 3rd week of April, we make these calculations accordingly.However, because these are just projections and not actual values and with [new](https://news.utexas.edu/2020/04/17/new-model-forecasts-9-states-likely-to-see-peak-in-covid-19-deaths-by-end-of-april/) COVID-19 models coming up, such as the one developed by researchers at the [University of Texas-Austin](https://covid-19.tacc.utexas.edu/projections/) using geolocation data from cellphones. In turn, they try to see how the state-level social distancing measures can be used to project number of COVID-19 deaths per day, along with associated probabilities of whether the peak has reached or not._
-
-
-
-
-
-
