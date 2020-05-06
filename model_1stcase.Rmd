@@ -1,5 +1,5 @@
 ---
-title: "Modelling and Prediction"
+title: "Candidate Model 1 (BEST MODEL)"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -7,7 +7,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F)
 ```
 
 ```{r load-packages, echo=T, message=F, warning=F}
@@ -22,6 +22,7 @@ library(parsnip)
 library(yardstick)
 library(ranger)
 library(ggalt)
+library(forcats)
 ```
 
 ```{r reshape-data, echo=T, message=F, warning=F}
@@ -239,36 +240,70 @@ bind_cols(
 ```
 
 
-```{r residual-viz}
+### Residual Plots
 
-# dumbbell plot for showing actual and predicted values for testing data
-ggplot() + 
-  geom_dumbbell(data = claims_testing, mapping = aes(x = initial_num, xend = .pred, y = state),
-                size=1.5, color="#e3e2e1", 
-                colour_x = "blue", colour_xend = "orange",
-                dot_guide=FALSE, show.legend = TRUE) +
-  geom_point(data = claims_testing, mapping = aes(x = Coverage, 
-                                          color = `Residence Type`, y = Year), size = 3)
-  theme_bw()
-
-### Residual Plots for Testing and Training Data
+```{r plot-dumbbell-testing}
 
 # create residual column for training and testing data
-claims_testing <- claims_testing %>%
-  mutate(residual = .pred - initial_num)
-
 claims_training <- claims_training %>%
   mutate(residual = .pred - initial_num)
 
-# Training Data
-ggplot(data = claims_training) +
-  geom_point(aes(x = initial_num, y = residual), shape = 1, color = "mediumblue") +
+claims_testing <- claims_testing %>%
+  mutate(residual = .pred - initial_num)
+
+# dumbbell plot for showing actual and predicted values for testing data
+# edit testing data for plot
+claims_reshape <- claims_testing %>%
+  select(initial_num, .pred, state) %>%
+  rename(Actual = initial_num, Predicted = .pred) %>%
+  pivot_longer(cols = c("Actual", "Predicted"), 
+                names_to = "value_type", 
+               values_to =  "value") %>%
+  mutate(state = fct_rev(factor(state)))
+
+claims_testing <- claims_testing %>%
+  mutate(state = fct_rev(factor(state)))
+
+ggplot() + 
+  geom_dumbbell(data = claims_testing, mapping = aes(x = initial_num, xend = .pred, y = state),
+                size=1.5, color="gray74", 
+                colour_x = "blue", colour_xend = "orange",
+                dot_guide=FALSE, show.legend = TRUE) +
+  geom_point(data = claims_reshape, 
+             mapping = aes(x = value, y = state, color = value_type), size = 1.5) +
+  scale_color_manual(name = "Initial Claims", values = c("blue", "orange"),
+                     labels = c("Observed", "Predicted")) +
+  theme_minimal() +
+  scale_x_continuous(breaks = c(0, 200000, 400000, 600000), 
+                     labels = c("0", "200000", "400000", "600000")) +
+  labs(title = "Differences Between Observed and \nPredicted Values in Testing Data",
+       x = "Initial Claims (April 18)",
+       y = "State") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
+        axis.title.x = element_text(family = "Arial", vjust = -2),
+        axis.title.y = element_text(family = "Arial", vjust = .5),
+        axis.text.x = element_text(family = "Arial", hjust = 1),
+        axis.text.y = element_text(family = "Arial"),
+        axis.ticks.x = element_blank()) +
+  theme(legend.position = "bottom")  +
+  theme(panel.grid.major.x  = element_blank()) +
+  theme(panel.grid.minor.x = element_blank()) 
+
+```
+
+The dumbbell plot above shows the state differences between the actual and predicted intitial unmeployment claims for April 18th. This visualization is a good way to compare residuals among states. For example, the plot shows that our predictions were most accurate for West Virginia, Kentucky and Alaska while they were least accurate for Michigan New York and California.
+
+```{r scatter-incidence-residuals}
+
+ggplot(data = claims_testing) +
+  geom_point(aes(x = Incident_Rate, y = residual), shape = 1, color = "mediumblue") +
   geom_hline(yintercept = 0, linetype = "solid", size = 0.5) +
   theme_minimal() +
-  scale_y_continuous(breaks = c(-400000, -200000, 0, 200000), 
-                     labels = c("-400000", "-200000", "0", "200000")) +
-  labs(title = "Residuals for RF Training Data",
-       x = "Initial Claims (Jan 25 - April 11)",
+scale_y_continuous(breaks = c(-300000, -200000, -100000,  0, 100000, 200000), 
+                     labels = c("-300000", "-200000", "-100000", "0", "100000", "200000")) +
+  labs(title = "RF Residuals and COVID-19 Incidence Rates",
+       x = "COVID-19 Incidence Rates",
        y = "Residuals") +
   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
         plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
@@ -279,8 +314,47 @@ ggplot(data = claims_training) +
         axis.ticks.x = element_blank()) +
   theme(panel.grid.major = element_blank()) 
 
+```
 
-# Testing Data
+The scatterplot above shows the relationship between the model residuals and COVID-19 incidence rates. The points in the plot generally show a positive relationship between the model residuals and COVID-19 incidence rates (with the exception of Florida). This means that our predictions were generally more accurate for states with a lower incidence of COVID-19. 
+
+<br>
+<br>
+
+
+We also construct plots to compare our residuals with observed initial claims. We construct these plots for predictions in the testing and training data. 
+
+```{r res-plot-training-training}
+
+### Residual Plots for Training Data
+
+ggplot(data = claims_training) +
+  geom_point(aes(x = initial_num, y = residual), shape = 1, color = "mediumblue") +
+  geom_hline(yintercept = 0, linetype = "solid", size = 0.5) +
+  theme_minimal() +
+  scale_y_continuous(breaks = c(-400000, -200000, 0, 200000), 
+                     labels = c("-400000", "-200000", "0", "200000")) +
+  labs(title = "Residuals for RF Training Data",
+       x = "Observed Initial Claims (Jan 25 - April 11)",
+       y = "Residuals") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
+        axis.title.x = element_text(family = "Arial", vjust = -2),
+        axis.title.y = element_text(family = "Arial", vjust = .5),
+        axis.text.x = element_text(family = "Arial", hjust = 1),
+        axis.text.y = element_text(family = "Arial"),
+        axis.ticks.x = element_blank()) +
+  theme(panel.grid.major = element_blank()) 
+
+```
+The plot above compares observed values of initial claims to our model's residuals in the training data. Residuals appear generally low and clustered around zero. Residuals also appear to be evenly split between positive and negative values, so our model does not appear to be over or underestimating predictions.
+
+
+
+```{r res-plot-training-testing}
+
+### Residual Plots for Testing Data
+
 ggplot(data = claims_testing) +
   geom_point(aes(x = initial_num, y = residual), shape = 1, color = "mediumblue") +
   geom_hline(yintercept = 0, linetype = "solid", size = 0.5) +
@@ -290,7 +364,7 @@ ggplot(data = claims_testing) +
   scale_x_continuous(breaks = c(0, 200000, 400000), 
                      labels = c("0", "200000", "400000")) +
   labs(title = "Residuals for RF Testing Data",
-       x = "Initial Claims (April 18)",
+       x = "Observed Initial Claims (April 18)",
        y = "Residuals") +
   theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
         plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
@@ -301,13 +375,8 @@ ggplot(data = claims_testing) +
         axis.ticks.x = element_blank()) +
   theme(panel.grid.major = element_blank()) 
 
-# NOTE: residuals look better for training, may have overfitted our model
-
-
-# line plot - decide if we're still doing
-ggplot(data = claims_testing) + 
-  geom_line(aes(x = as.factor(state), y = initial_num, color = "red", group = 1)) +
-  geom_line(aes(x = as.factor(state), y = .pred, color = "blue", group = 1)) 
-
-
 ```
+
+The plot above compares observed values of initial claims to our model's residuals in the testing data. Here, residuals are more spread out than in the training data, indicating a lot of variation in the distribution of predicted values. Most residual are also above zero, indicating that our predictions were generally overestimating initial claims. The variation and positive bias of residuals may indicate that we may have overfitted our model for the training data, which made it perform poorly in the testing data. 
+
+
