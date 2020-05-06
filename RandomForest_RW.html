@@ -369,7 +369,10 @@ summary {
 <pre class="r"><code>library(haven)
 library(tidyverse)
 library(lubridate)
-library(tidymodels)
+library(rsample)
+library(recipes)
+library(parsnip)
+library(yardstick)
 library(ranger)</code></pre>
 <pre class="r"><code># read in data
 claims_data &lt;- read_csv(&quot;data/clean/merged.csv&quot;)
@@ -617,16 +620,26 @@ knitr::kable(claims_resamples)</code></pre>
 ##            &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;
 ## 1         44629.         42230.         44267.         74993.</code></pre>
 <p>Estimating out of sample error rate</p>
-<pre class="r"><code>model_final &lt;-
+<pre class="r"><code># Final prediction on testing data
+model_final &lt;-
   rand_forest(mode = &quot;regression&quot;) %&gt;%
   set_engine(&quot;ranger&quot;,
              importance = &quot;impurity&quot;) %&gt;%
   fit(initial_claims_2020_04_11 ~.,
       data = claims_training)
 
+
+# Adding predicted values column to testing data
+claims_testing &lt;- bind_cols(
+  claims_testing,
+  pred_claims_2020_04_18 = predict(model_final, claims_testing)
+) 
+
+
+# Error metric estimation
 bind_cols(
   claims_testing,
-  predict(model_final, claims_testing)
+  pred_claims_2020_04_18 = predict(model_final, claims_testing)
 ) %&gt;%
   metrics(truth = initial_claims_2020_04_11, 
           estimate = .pred)</code></pre>

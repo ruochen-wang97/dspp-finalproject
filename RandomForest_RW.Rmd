@@ -177,6 +177,7 @@ Estimating out of sample error rate
 
 ```{r fitting model to testing data}
 
+# Final prediction on testing data
 model_final <-
   rand_forest(mode = "regression") %>%
   set_engine("ranger",
@@ -184,9 +185,18 @@ model_final <-
   fit(initial_claims_2020_04_11 ~.,
       data = claims_training)
 
+
+# Adding predicted values column to testing data
+claims_testing <- bind_cols(
+  claims_testing,
+  pred_claims_2020_04_18 = predict(model_final, claims_testing)
+) 
+
+
+# Error metric estimation
 bind_cols(
   claims_testing,
-  predict(model_final, claims_testing)
+  pred_claims_2020_04_18 = predict(model_final, claims_testing)
 ) %>%
   metrics(truth = initial_claims_2020_04_11, 
           estimate = .pred)
