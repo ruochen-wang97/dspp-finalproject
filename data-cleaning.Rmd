@@ -304,7 +304,7 @@ ggplot(data = line_data_date,
         axis.ticks.x = element_blank())
 ```
 
-The tree map below captures the relationship between the cumulative number of unemployment claims filed in each state and the total number of COVID-19 cases in each state as of April 18th. The area each state covers encodes the number of claims in that state, and the color value encodes the COVID-19 incidence rate. This visualization allows us to see the relationship between the geographic distribution of COVID-19 cases and the number of unemployment claims filed (e.g., hot spots like New York and New Jersey also have relatively large number of filed claims). We thus believe region and COVID-19 incident rate are also important predictors in our model.
+The tree map below captures the relationship between the cumulative number of unemployment claims filed in each state and the total number of COVID-19 cases in each state as of April 18th. The area each state covers encodes the number of claims in that state, and the color value encodes the COVID-19 incidence rate. This visualization allows us to see the relationship between the geographic distribution of COVID-19 incident rates and the number of unemployment claims filed (e.g., hot spots like New York and New Jersey also have relatively large number of filed claims). We thus believe region and COVID-19 incident rate are also important predictors in our model.
 
 ```{r make-treemap, echo=T, message=F, warning=F}
 
@@ -344,13 +344,9 @@ ggplot(data = treemap_data,
         legend.text = element_text(family = "Arial"))
 ```
 
-<<<<<<< HEAD
-The tree map above captures the total number of US uninsurance claims filed as of April 18th and the number of COVID-19 cases. States are grouped by region and the area each state covers is proportional to the number of claims filed. The color of each area corresponds to the number of COVID-19 cases; states with higher COVID-19 cases have darker colored areas. This visualization allows us to see regional patterns in the spread of COVID-19 as well as the number of unemployment claims filed. Most affected population have been the self-employed and gig workers, as well as workers in hospitality industry such as restaurants, who were made eligible for unemployement benefits when they experienced job losses.
-=======
-The scatterplot below unveils the relationship between COVID-19 incident rate and proportion of labor force filing for unemployment in each state. The dots on the scatterplot represent states, which are also colored by the party of the state governor. The graph shows a moderately positive correlation between COVID-19 incidence rate and proportion of labor force filing for unemployment - this makes sense since the spread of COVID-19 forces employers to shut down and laying off workers, leaving many unemployed. The relationship also appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model as it shows us the interaction between these three variables.
+The scatterplot below unveils the relationship between COVID-19 incident rate and proportion of labor force filing for unemployment in each state. The dots on the scatterplot represent states, which are also colored by the party of the state governor. The graph shows a moderately positive correlation between COVID-19 incidence rate and proportion of labor force filing for unemployment - this makes sense since the spread of COVID-19 forces employers to shut down and laying off workers, leaving many unemployed. The relationship also appears to be mostly driven by states with Democrat governors, as many of them have higher incident rates than Republican states. This relationship is informative for our model as it shows us the interaction between these three variables.
 
 ```{r make-scatter-plot, echo=T, message=F, warning=F}
->>>>>>> 40a3318e050f1504fde92b04c5adf4518e5c48b3
 
 clean_data %>%
   mutate(perc_claim = (`continued_claims_2020_04_18`/totpop_2018) * 100) %>%
@@ -378,11 +374,7 @@ clean_data %>%
  
 The ridgeplot below shows the distribution of the number of days since the peak COVID-19 deaths as of April 18, broken down by region. Although this graph only shows braod patterns, it is useful for understanding which regions will be combating COVID-19 and (possibly) see increased unemployment claims for a longer period.
 
-<<<<<<< HEAD
-The scatterplot above shows the relationship between continued unemployment claims filed and the COVID-19 incidence rate among US states. The points on the scatterplot are also colored by the party of the state governor. The graph shows a moderately positive relationship between COVID-19 incidence rates and continued claims as a percentage of the working population. This makes sense as the spread of COVID-19 has forced employers to shut down, leaving many unemployed. The relationship appears to be mostly driven by states with Democrat governors, as many of them have higher incidence rates than Republican states. This relationship is informative for our model becasue it shows that COVID-19 incidence rates are associated (to some degree) with the number of unisurance claims, which makes it a good predictor. 
-=======
 ```{r make-ridge-plot, echo=T, message=F, warning=F}
->>>>>>> 40a3318e050f1504fde92b04c5adf4518e5c48b3
 
 # create variable for peak since April 18th
 
