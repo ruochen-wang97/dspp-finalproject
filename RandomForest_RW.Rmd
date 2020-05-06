@@ -15,7 +15,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(haven)
 library(tidyverse)
 library(lubridate)
-library(tidymodels)
+library(rsample)
+library(recipes)
+library(parsnip)
+library(yardstick)
 library(ranger)
 ```
 
