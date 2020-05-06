@@ -21,6 +21,7 @@ library(recipes)
 library(parsnip)
 library(yardstick)
 library(ranger)
+library(ggalt)
 ```
 
 ```{r reshape-data, echo=T, message=F, warning=F}
@@ -222,6 +223,12 @@ claims_testing <- bind_cols(
   pred_claims_2020_04_18 = predict(model_final, claims_testing)
 ) 
 
+# add predicted values column to training data
+claims_training <- bind_cols(
+  claims_training,
+  pred_claims = predict(model_final, claims_training)
+) 
+
 # Error metric estimation
 bind_cols(
   claims_testing,
@@ -229,4 +236,78 @@ bind_cols(
 ) %>%
   metrics(truth = initial_num, 
           estimate = .pred)
+```
+
+
+```{r residual-viz}
+
+# dumbbell plot for showing actual and predicted values for testing data
+ggplot() + 
+  geom_dumbbell(data = claims_testing, mapping = aes(x = initial_num, xend = .pred, y = state),
+                size=1.5, color="#e3e2e1", 
+                colour_x = "blue", colour_xend = "orange",
+                dot_guide=FALSE, show.legend = TRUE) +
+  geom_point(data = claims_testing, mapping = aes(x = Coverage, 
+                                          color = `Residence Type`, y = Year), size = 3)
+  theme_bw()
+
+### Residual Plots for Testing and Training Data
+
+# create residual column for training and testing data
+claims_testing <- claims_testing %>%
+  mutate(residual = .pred - initial_num)
+
+claims_training <- claims_training %>%
+  mutate(residual = .pred - initial_num)
+
+# Training Data
+ggplot(data = claims_training) +
+  geom_point(aes(x = initial_num, y = residual), shape = 1, color = "mediumblue") +
+  geom_hline(yintercept = 0, linetype = "solid", size = 0.5) +
+  theme_minimal() +
+  scale_y_continuous(breaks = c(-400000, -200000, 0, 200000), 
+                     labels = c("-400000", "-200000", "0", "200000")) +
+  labs(title = "Residuals for RF Training Data",
+       x = "Initial Claims (Jan 25 - April 11)",
+       y = "Residuals") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
+        axis.title.x = element_text(family = "Arial", vjust = -2),
+        axis.title.y = element_text(family = "Arial", vjust = .5),
+        axis.text.x = element_text(family = "Arial", hjust = 1),
+        axis.text.y = element_text(family = "Arial"),
+        axis.ticks.x = element_blank()) +
+  theme(panel.grid.major = element_blank()) 
+
+
+# Testing Data
+ggplot(data = claims_testing) +
+  geom_point(aes(x = initial_num, y = residual), shape = 1, color = "mediumblue") +
+  geom_hline(yintercept = 0, linetype = "solid", size = 0.5) +
+  theme_minimal() +
+  scale_y_continuous(breaks = c(-300000, -200000, -100000,  0, 100000, 200000), 
+                     labels = c("-300000", "-200000", "-100000", "0", "100000", "200000")) +
+  scale_x_continuous(breaks = c(0, 200000, 400000), 
+                     labels = c("0", "200000", "400000")) +
+  labs(title = "Residuals for RF Testing Data",
+       x = "Initial Claims (April 18)",
+       y = "Residuals") +
+  theme(plot.margin = unit(c(.5, .5, .5, .5),"cm"),
+        plot.title = element_text(size = 16, family = "Arial", face = "bold", vjust = 4),
+        axis.title.x = element_text(family = "Arial", vjust = -2),
+        axis.title.y = element_text(family = "Arial", vjust = .5),
+        axis.text.x = element_text(family = "Arial", hjust = 1),
+        axis.text.y = element_text(family = "Arial"),
+        axis.ticks.x = element_blank()) +
+  theme(panel.grid.major = element_blank()) 
+
+# NOTE: residuals look better for training, may have overfitted our model
+
+
+# line plot - decide if we're still doing
+ggplot(data = claims_testing) + 
+  geom_line(aes(x = as.factor(state), y = initial_num, color = "red", group = 1)) +
+  geom_line(aes(x = as.factor(state), y = .pred, color = "blue", group = 1)) 
+
+
 ```
