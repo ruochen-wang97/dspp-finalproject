@@ -1,0 +1,153 @@
+---
+title: "KNN_RW(Archived)"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, echo=T, message=F, warning=F}
+
+library(haven)
+library(tidyverse)
+library(lubridate)
+library(tidymodels)
+library(caret)
+library(ranger)
+```
+
+```{r split-and-preprocess-data-for-knn, echo=T, message=F, warning=F}
+
+# read in data
+claims_data <- read_csv("~/Downloads/DataScienceAssignments/groupproject/data/clean/merged.csv")
+
+# make dataset
+claims_data <- claims_data %>%
+  select(initial_claims_2020_03_21, initial_claims_2020_03_28, initial_claims_2020_04_04, initial_claims_2020_04_11, continued_claims_2020_03_21, continued_claims_2020_03_28, continued_claims_2020_04_04, continued_claims_2020_04_11, sah_date, days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, Mortality_Rate, region, topind_gdp, topindemp_1, topindemp_2, topindemp_3, totpop_2018, pctpop_work, pctpop_hs, gov_republican) %>%
+  mutate(days_since_sah = as.Date("2020-04-11") - ymd(sah_date)) %>%
+  mutate(days_since_sah = replace_na(days_since_sah, 0)) %>%
+  mutate(days_since_peak = days_since_peak_deaths - 21) %>%
+  mutate(gov_republican = factor(gov_republican)) %>%
+  select(-sah_date)
+
+# split data into training and testing sets
+set.seed(20200504)
+
+claims_split <- initial_split(claims_data, prop = .8)
+claims_training <- training(claims_split)
+claims_testing <- testing(claims_split)
+# and the testing set is now under lock and key!!!
+
+# create recipe for knn
+recipe_claims <- recipe(formula = initial_claims_2020_04_11 ~.,
+                        data = claims_training) %>%
+  step_string2factor(region, topind_gdp, topindemp_1, topindemp_2, topindemp_3) %>%
+  step_normalize(initial_claims_2020_03_21, initial_claims_2020_03_28, initial_claims_2020_04_04, initial_claims_2020_04_11, continued_claims_2020_03_21, continued_claims_2020_03_28, continued_claims_2020_04_04, continued_claims_2020_04_11, days_since_peak_deaths, sum_conf, sum_deaths, Incident_Rate, Mortality_Rate, totpop_2018, pctpop_work, pctpop_hs) %>%
+  step_dummy(gov_republican) %>%
+  prep()
+
+# create 10-fold
+claims_resamples <- vfold_cv(data = claims_training, v = 10)
+```
+
+```{r repeat-process-for-knn, echo=T, message=F, warning=F}
+
+# create custom function
+train_claims <- function(model, split, formula, try, tree, k) {
+  
+  # create analysis data from split
+  claims_analysis <- analysis(split)
+  
+  # set model
+  if(model == "rf") {
+    model_claims <- rand_forest(mode = "regression",
+                                mtry = try,
+                                trees = tree) %>%
+      set_engine("ranger",
+                 importance = "impurity") %>%
+      fit(formula = formula,
+          data = bake(object = recipe_claims,
+                      new_data = claims_analysis))
+  }
+  else if(model == "knn") {
+    model_claims <- nearest_neighbor(mode = "regression",
+                                     neighbors = k) %>%
+      set_engine("kknn") %>%
+      fit(formula = formula,
+          data = bake(object = recipe_claims,
+                      new_data = claims_analysis))
+  }
+  
+  # create assessment data from split
+  claims_assessment <- assessment(split)
+  
+  # get predictions on assessment data and colculate out-of-sample rmse for split
+  rmse <- bind_cols(
+    claims_assessment,
+    predict(model_claims, bake(object = recipe_claims,
+                               new_data = claims_assessment))) %>%
+    rmse(truth = initial_claims_2020_04_11, estimate = .pred) %>%
+    pull(.estimate)
+  
+  return(rmse)
+}
+```
+
+```{r pick-model-and-train-on-training-data, echo=T, message=F, warning=F}
+
+# calculate RMSEs for : apply custom function to resamples
+
+claims_resamples <- claims_resamples %>%
+  mutate(
+    rmse_4 = map_dbl(.x = splits,
+                     .f = ~train_claims(model = "knn",
+                                        formula = initial_claims_2020_04_11 ~ .,
+                                        split = .x,
+                                        k = 10))
+  ) %>%
+  mutate(
+    rmse_5 = map_dbl(.x = splits,
+                     .f = ~train_claims(model = "knn",
+                                        formula = initial_claims_2020_04_11 ~ .,
+                                        split = .x,
+                                        k = 25))
+  ) %>%
+  mutate(
+    rmse_6 = map_dbl(.x = splits,
+                     .f = ~train_claims(model = "knn",
+                                        formula = initial_claims_2020_04_11 ~ .,
+                                        split = .x,
+                                        k = 50))
+  )
+
+glimpse(claims_resamples)
+
+#get avg RMSE for each k
+knitr::kable(rmse_avg <- c(mean(claims_resamples$rmse_4),
+                           mean(claims_resamples$rmse_5),
+                           mean(claims_resamples$rmse_6)),
+             col.names = "RMSE"
+)
+```
+
+```{r make-predictions, echo=T, message=F, warning=F}
+
+model_diamonds_full <-
+  nearest_neighbor(mode = "regression",
+                   neighbors = 100) %>%
+  set_engine("kknn") %>%
+  fit(formula = price ~.,
+      data = bake(object = recipe_diamonds,
+                  new_data = diamonds_training))
+
+#make predictions
+bind_cols(diamonds_training,
+          predict(model_diamonds_full,
+                  bake(object = recipe_diamonds,
+                       new_data = diamonds_training))
+) %>%
+  rmse(truth = price, estimate = .pred)
+```
