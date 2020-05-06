@@ -43,7 +43,7 @@ _Structural Variables_
 - **personal_inc2019**: per capita personal income in 2019
 - **gov_republican**: dummy set equal to 1 if governor republican
 
-_[^1]: Calculated based on projections made by IHME. Last updated on April 29 and is no longer being updated. See [here](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) for predicted peaks.
+_[^1]: Calculated based on projections made by IHME. Last updated on April 29 and is no longer being updated. See [here](https://www.businessinsider.com/map-when-each-state-will-experience-coronavirus-peak-outbreak-2020-4) for predicted peaks._
 
 ## Modeling
 
