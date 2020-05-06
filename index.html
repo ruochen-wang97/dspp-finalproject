@@ -376,18 +376,18 @@ summary {
 <div id="data" class="section level2">
 <h2>Data</h2>
 <p>We tested different models and decided to use data spanning from the week ending January 25, when the first case in the US was reported by the Centers for Disease Control and Prevention (CDC), to the week ending April 18, when the latest federal data are available.</p>
-<p>The predicted and predictors variables in our dataset are from the following sources:</p>
+<p>The target and predictor variables in our dataset are from the following sources:</p>
 <ul>
 <li><a href="https://oui.doleta.gov/unemploy/claims.asp">Unemployment Insurance Weekly Claims data</a>, administered by the U.S. Department of Labor (DOL)’s Employment &amp; Training Administration</li>
 <li>COVID-19 tracking data from the <a href="https://github.com/CSSEGISandData/COVID-19">COVID-19 Data Repository</a>, administered by CSSE at Johns Hopkins University</li>
 <li>COVID-19 projection data from the <a href="http://www.healthdata.org/">Institute for Health Metrics and Evaluation (IHME)</a> at the University of Washington</li>
-<li>State-level structural data from the <a href="https://www.census.gov">U.S. Census Bureau</a></li>
+<li>Structural data from the <a href="https://www.census.gov">U.S. Census Bureau</a></li>
 </ul>
 <div id="codebook" class="section level3">
 <h3>Codebook</h3>
 <p><em>Real-time Variables</em></p>
 <ul>
-<li><strong>initial_num</strong>: outcome car. # of new claims filed for that week.</li>
+<li><strong>initial_num</strong>: target var. # of new claims filed for that week.</li>
 <li><strong>continued_num</strong>: # of insured unemployment for that week</li>
 <li><strong>days_since_sah</strong>: # days between the last day of week and the day when state issued stay-at-home order</li>
 <li><strong>days_since_peak<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></strong>: # of days between last day of week and predicted death peak according to IHME</li>
@@ -412,10 +412,10 @@ summary {
 </div>
 <div id="modeling" class="section level2">
 <h2>Modeling</h2>
-<p>We constructed a Random Forest (RF) model to predict the number of new unemployment insurance claims filed for the week ending April 18 using the variables listed above. We used three subsets of data - data from when the first COVID cases was reported in the US, data from when the first COVID-related death was discovered in the US, and data from when the first stay-at-home order was issued in California - to determine the best model. We also tested a CART model together with RF models with different hyperparameters within different subsets of data, and for every data subset RF models always perform better than the CART model.</p>
+<p>We constructed a Random Forest (RF) model to predict the number of new unemployment insurance claims filed for the week ending April 18 using the variables listed above. We used three subsets of data - data from when the first COVID case was reported in the US, data from when the first COVID-related death was discovered in the US, and data from when the first stay-at-home order was issued in California - to determine the best model. Within each of the above scenarios, we tested a CART model together with three RF models with different hyperparameters, and for every data subset RF models always perform better than the CART model.</p>
 <ul>
 <li><p><strong>Training and Testing Sets</strong>: After researching existing time-series models, we decided to assign the data from the week ending April 18 to the testing set and all the other data from previous week to the training set. This allows us to predict the outcome for the week ending April 18 based on data from previous weeks.</p></li>
-<li><p><strong>Resampling</strong>: bootstrap</p></li>
+<li><p><strong>Resampling</strong>: Bootstrap</p></li>
 <li><p><strong>Outcome Variable</strong>: <em>initial_num</em></p></li>
 <li><p><strong><a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stcase.html">Candidate Model 1</a></strong>: Random Forest</p>
 <ul>
@@ -435,14 +435,14 @@ summary {
 <li><strong># of Features at Each Split:</strong> 5</li>
 <li><strong># of Trees:</strong> 100</li>
 </ul></li>
-<li><p><strong>Error Metric</strong>: Root Mean Square Error (RMSE). We decided to use RMSE because the outcome we are predicting is a regression problem.</p></li>
+<li><p><strong>Error Metric</strong>: Root Mean Square Error (RMSE). We decided to use RMSE because the outcome we are predicting is a regression problem, and it penalizes outlier observations.</p></li>
 </ul>
-<p>We decided that Candidte Model 1 is the best model given that it has the lowest error rate.</p>
+<p>We decided that Candidate Model 1 is the best model given that it has the lowest error rate.</p>
 </div>
 <div id="discussion-and-limitations" class="section level2">
 <h2>Discussion and Limitations</h2>
-<p>For this project, we constructed a Random Forest model in a supervised machine learning environment to predict the number of new unemployment insurance claims filed per keek in the time of COVID-19. We used real-time variables such as the number of insured unemployment up until the target week and the number of days since the state issued a stay-at-home order as proxies for the interaction between the labor market and the ongoing pandemic, and structural variables to account for characteristics unique to each state. We end up with a model with 500 trees and five features at each split, with an R-sqaured of .683.</p>
-<p>Our theory for the primary reason the first candidate model outperform the other two is that it is trained on a larger dataset. This means it can utilize more information when making predictions. Within each subset of data (data from week ending January 25, March 7, and March 21), RF models always outperform the CART model because they allow for different combinations of features in each iteration and hence capture more variation in the data. Potential limitations of our model include overfitting, as is showcased in the residual plot that the RMSE for the training data is <strong>way</strong> lower than that for the testing data, and inevitable bias due to the complexity in the factors affecting the labor market. Additionally, as with all Random Forest models, our model may not be very robust when changing the input data and the outcome it predicts for the following weeks might not be hyper consistent/reliable.</p>
+<p>For this project, we constructed a Random Forest model in a supervised machine learning environment to predict the number of new unemployment insurance claims filed per week in the time of COVID-19. We used real-time variables such as the number of insured unemployment up until the target week and the number of days since the state issued a stay-at-home order as proxies for the interaction between the labor market and the ongoing pandemic, and structural variables to account for characteristics unique to each state. We end up with a model with 500 trees and five features at each split, with an R-sqaured of .683.</p>
+<p>We think the primary reason that the first candidate model outperforms the other two is that it is trained on a larger dataset. This means it can utilize more information when making predictions. Within each subset of data (data from week ending January 25, March 7, and March 21), RF models always outperform the CART model because they allow for different combinations of features in each iteration and hence capture more variation in the data. Potential limitations of our model include overfitting, as suggested by the much lower RMSEs and residules for the training data than for the testing data (see <a href="https://ruochen-wang97.github.io/dspp-finalproject/model_1stcase.html">residual plot</a>), as well as inevitable biases associated with the complexity in the factors affecting the labor market. Additionally, as with all Random Forest models, our model may not be very robust when changing the input data and the outcome it predicts for the following weeks might not be hyper consistent/reliable. It also cannot factor in the interdependence between observations in time series data when making splits.</p>
 </div>
 </div>
 <div class="footnotes">
