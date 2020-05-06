@@ -154,7 +154,7 @@ claims_resamples <- claims_resamples %>%
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 10,
-                                           tree = 100))
+                                           tree = 500))
   ) %>%
   mutate(
     rmse_rf_3 = map_dbl(.x = splits,

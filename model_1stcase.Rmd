@@ -59,7 +59,7 @@ claims_long <- claims_long %>%
   mutate(days_since_peak =
            days_since_peak_deaths - (as.Date("2020-05-01") - as.Date(date))) %>%
   mutate(gov_republican = factor(gov_republican)) %>%
-  filter(as.Date(date) >= as.Date("2020-03-07")) %>% #filter to 1st death according to cdc
+  filter(as.Date(date) >= as.Date("2020-01-25")) %>% #filter to 1st case
   select(-sah_date, -days_since_peak_deaths)
 ```
 
@@ -154,7 +154,7 @@ claims_resamples <- claims_resamples %>%
                         .f = ~train_claims(model = "rf",
                                            split = .x,
                                            try = 10,
-                                           tree = 100))
+                                           tree = 500))
   ) %>%
   mutate(
     rmse_rf_3 = map_dbl(.x = splits,
@@ -204,7 +204,7 @@ claims_resamples %>%
 model_final <-
   rand_forest(mode = "regression",
               mtry = 5,
-              trees = 100) %>%
+              trees = 500) %>%
   set_engine("ranger",
              importance = "impurity") %>%
   fit(initial_num ~
