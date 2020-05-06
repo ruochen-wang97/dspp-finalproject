@@ -50,8 +50,12 @@ anti_join(initial_long, continued_long)
 # select variables - using sah and peak dummies instead of dates
 claims_long <- claims_long %>%
   select(initial_type, initial_num, continued_type.x, continued_num, 
-         date, Incident_Rate, Mortality_Rate, region, sah_yn, peak_death_yn, topind_gdp,          topindemp_1, topindemp_2, topindemp_3, totpop_2018, pctpop_work, pctpop_hs, 
+         date, Incident_Rate, Mortality_Rate, region, sah_yn,
+         peak_death_yn, topind_gdp, topindemp_1, topindemp_2, 
+         topindemp_3, totpop_2018, pctpop_work, pctpop_hs, 
          personal_inc2019, gov_republican, state) %>%
+  mutate(sah_yn = factor(sah_yn)) %>%
+  mutate(peak_death_yn = factor(peak_death_yn)) %>%
   mutate(gov_republican = factor(gov_republican))
 ```
 
